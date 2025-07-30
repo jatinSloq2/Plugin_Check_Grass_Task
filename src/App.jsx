@@ -40,6 +40,140 @@ const App = () => {
       ? setChatSettings({ ...chatSettings, [name]: value })
       : setBrandSettings({ ...brandSettings, [name]: value });
   };
+  //   const generatedScript = `
+  // <div id="whatsapp-widget" style="position: fixed; bottom: ${
+  //     chatSettings.marginBottom
+  //   }px; ${
+  //     chatSettings.position === "right"
+  //       ? `right: ${chatSettings.marginRight}px;`
+  //       : `left: ${chatSettings.marginLeft}px;`
+  //   } z-index: 9999;">
+  //   <div id="widget-container" style="position: relative;">
+  //     <div id="widget-icon" style="width: 70px; height: 70px; background: linear-gradient(135deg, ${
+  //       chatSettings.backgroundColor
+  //     }, #00b761); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; z-index: 10001; box-shadow: 0 8px 25px rgba(0, 231, 133, 0.5);">
+  //       <img src="${
+  //         chatSettings.normalIconUrl
+  //       }" alt="Chat Icon" style="width: 40px; height: 40px;" />
+  //     </div>
+  //     <div id="widget-content" style="display: none; background: #ffffff; padding: 20px; border: 4px solid ${
+  //       chatSettings.backgroundColor
+  //     }; border-radius: 15px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25); position: absolute; bottom: 90px; right: 0; flex-direction: column; align-items: flex-start; gap: 15px; transition: opacity 0.4s ease, transform 0.4s ease; opacity: 0; transform: translateY(20px); z-index: 10000; width: 300px; min-height: 180px; background: linear-gradient(135deg, #ffffff, #f9f9f9);">
+  //       <div style="background: linear-gradient(135deg, ${
+  //         chatSettings.backgroundColor
+  //       }, #00b761); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 231, 133, 0.3); margin-bottom: 10px;">
+  //         <img src="${brandSettings.brandImg}" alt="${
+  //     brandSettings.brandName
+  //   }" style="width: 30px; height: 30px; border-radius: 50%;" />
+  //       </div>
+  //       <div style="display: flex; flex-direction: column; gap: 5px; padding: 0 10px;">
+  //         <strong style="font-size: 18px; color: #1a1a1a; font-weight: 700; line-height: 1.2;">${
+  //           chatSettings.mainText
+  //         }</strong>
+  //         <span style="font-size: 16px; color: #555; line-height: 1.4;">${
+  //           chatSettings.subText
+  //         }</span>
+  //       </div>
+  //       <button id="chat-button" style="
+  //         background: linear-gradient(135deg, ${
+  //           chatSettings.backgroundColor
+  //         }, #00b761);
+  //         border: none;
+  //         border-radius: 8px;
+  //         padding: 12px 24px;
+  //         color: white;
+  //         font-size: 16px;
+  //         font-weight: 600;
+  //         width: 100%;
+  //         text-align: center;
+  //         cursor: pointer;
+  //         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  //         transition: transform 0.3s ease, box-shadow 0.3s ease;
+  //         margin-top: auto;
+  //       ">
+  //         <img src="${
+  //           chatSettings.normalIconUrl
+  //         }" alt="Chat" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;" />
+  //         ${chatSettings.ctaText}
+  //         <span style="margin-left: 8px; vertical-align: middle;">▶</span>
+  //       </button>
+  //       <div style="position: absolute; bottom: -15px; right: 30px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 15px solid ${
+  //         chatSettings.backgroundColor
+  //       }; box-shadow: 0 -2px 10px rgba(0, 231, 133, 0.2);"></div>
+  //     </div>
+  //   </div>
+
+  //   <script>
+  //     (function () {
+  //       const widgetIcon = document.getElementById('widget-icon');
+  //       const widgetContent = document.getElementById('widget-content');
+  //       const chatButton = document.getElementById('chat-button');
+  //       const widgetContainer = document.getElementById('widget-container');
+  //       const chatWidgetOptions = {
+  //         brandName: "${brandSettings.brandName}",
+  //         welcomeText: "${brandSettings.welcomeText
+  //           .replace(/`/g, "\\`")
+  //           .replace(/\n/g, "\\n")}",
+  //         phoneNumber: "${brandSettings.phoneNumber}",
+  //         messageText: "${brandSettings.messageText
+  //           .replace(/`/g, "\\`")
+  //           .replace(/{{page_link}}/g, '"+window.location.href+"')
+  //           .replace(/\n/g, "\\n")}"
+  //       };
+
+  //       let timeoutId;
+
+  //       widgetIcon.addEventListener('mouseover', function () {
+  //         clearTimeout(timeoutId); // Clear any existing timeout
+  //         widgetContent.style.display = 'flex';
+  //         setTimeout(() => {
+  //           widgetContent.style.opacity = '1';
+  //           widgetContent.style.transform = 'translateY(0)';
+  //         }, 10);
+  //         widgetIcon.style.transform = 'scale(1.15)';
+  //         widgetIcon.style.boxShadow = '0 10px 30px rgba(0, 231, 133, 0.7)';
+  //       });
+
+  //       widgetContent.addEventListener('mouseover', function () {
+  //         clearTimeout(timeoutId); // Keep widget open while hovering over content
+  //         widgetContent.style.opacity = '1';
+  //         widgetContent.style.transform = 'translateY(0)';
+  //       });
+
+  //       // Close widget with a delay when leaving the container
+  //       widgetContainer.addEventListener('mouseleave', function () {
+  //         timeoutId = setTimeout(() => {
+  //           widgetContent.style.opacity = '0';
+  //           widgetContent.style.transform = 'translateY(20px)';
+  //           setTimeout(() => {
+  //             widgetContent.style.display = 'none';
+  //           }, 400);
+  //           widgetIcon.style.transform = 'scale(1)';
+  //           widgetIcon.style.boxShadow = '0 8px 25px rgba(0, 231, 133, 0.5)';
+  //         }, 100); // Small delay to allow smooth transition to content
+  //       });
+
+  //       chatButton.addEventListener('click', function () {
+  //         var msg = encodeURIComponent(chatWidgetOptions.messageText);
+  //         var phone = chatWidgetOptions.phoneNumber.replace(/\\D/g, "");
+  //         var waURL = "https://wa.me/" + phone + "?text=" + msg;
+  //         window.open(waURL, "_blank");
+  //       });
+
+  //       chatButton.addEventListener('mouseover', function () {
+  //         chatButton.style.transform = 'translateY(-3px)';
+  //         chatButton.style.boxShadow = '0 12px 35px rgba(0, 0, 0, 0.4)';
+  //       });
+
+  //       chatButton.addEventListener('mouseout', function () {
+  //         chatButton.style.transform = 'translateY(0)';
+  //         chatButton.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.35)';
+  //       });
+  //     })();
+  //   </script>
+  // </div>
+  // `;
+
   const generatedScript = `
 <div id="whatsapp-widget" style="position: fixed; bottom: ${
     chatSettings.marginBottom
@@ -49,57 +183,55 @@ const App = () => {
       : `left: ${chatSettings.marginLeft}px;`
   } z-index: 9999;">
   <div id="widget-container" style="position: relative;">
-    <div id="widget-icon" style="width: 70px; height: 70px; background: linear-gradient(135deg, ${
+    <div id="widget-icon" style="width: 50px; height: 50px; background: ${
       chatSettings.backgroundColor
-    }, #00b761); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; z-index: 10001; box-shadow: 0 8px 25px rgba(0, 231, 133, 0.5);">
+    }; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; z-index: 10001; box-shadow: 0 4px 10px rgba(0, 231, 133, 0.3);">
       <img src="${
         chatSettings.normalIconUrl
-      }" alt="Chat Icon" style="width: 40px; height: 40px;" />
+      }" alt="Chat Icon" style="width: 30px; height: 30px;" />
     </div>
-    <div id="widget-content" style="display: none; background: #ffffff; padding: 20px; border: 4px solid ${
+    <div id="widget-content" style="display: none; background: #ffffff; padding: 10px; border: 2px solid ${
       chatSettings.backgroundColor
-    }; border-radius: 15px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25); position: absolute; bottom: 90px; right: 0; flex-direction: column; align-items: flex-start; gap: 15px; transition: opacity 0.4s ease, transform 0.4s ease; opacity: 0; transform: translateY(20px); z-index: 10000; width: 300px; min-height: 180px; background: linear-gradient(135deg, #ffffff, #f9f9f9);">
-      <div style="background: linear-gradient(135deg, ${
+    }; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); position: absolute; bottom: 60px; right: 0; flex-direction: column; align-items: flex-start; gap: 5px; transition: opacity 0.3s ease, transform 0.3s ease; opacity: 0; transform: translateY(10px); z-index: 10000; width: 200px; min-height: 80px;">
+      <div style="background: ${
         chatSettings.backgroundColor
-      }, #00b761); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 231, 133, 0.3); margin-bottom: 10px;">
+      }; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
         <img src="${brandSettings.brandImg}" alt="${
     brandSettings.brandName
-  }" style="width: 30px; height: 30px; border-radius: 50%;" />
+  }" style="width: 20px; height: 20px; border-radius: 50%;" />
       </div>
-      <div style="display: flex; flex-direction: column; gap: 5px; padding: 0 10px;">
-        <strong style="font-size: 18px; color: #1a1a1a; font-weight: 700; line-height: 1.2;">${
+      <div style="display: flex; flex-direction: column; gap: 2px; padding: 0 5px;">
+        <strong style="font-size: 14px; color: #1a1a1a; font-weight: 600; line-height: 1.2;">${
           chatSettings.mainText
         }</strong>
-        <span style="font-size: 16px; color: #555; line-height: 1.4;">${
+        <span style="font-size: 12px; color: #555; line-height: 1.3;">${
           chatSettings.subText
         }</span>
       </div>
       <button id="chat-button" style="
-        background: linear-gradient(135deg, ${
-          chatSettings.backgroundColor
-        }, #00b761);
+        background: ${chatSettings.backgroundColor};
         border: none;
-        border-radius: 8px;
-        padding: 12px 24px;
+        border-radius: 5px;
+        padding: 6px 12px;
         color: white;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: 500;
         width: 100%;
         text-align: center;
         cursor: pointer;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        margin-top: auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-top: 5px;
       ">
         <img src="${
           chatSettings.normalIconUrl
-        }" alt="Chat" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;" />
+        }" alt="Chat" style="width: 12px; height: 12px; margin-right: 4px; vertical-align: middle;" />
         ${chatSettings.ctaText}
-        <span style="margin-left: 8px; vertical-align: middle;">▶</span>
+        <span style="margin-left: 4px; vertical-align: middle;">▶</span>
       </button>
-      <div style="position: absolute; bottom: -15px; right: 30px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 15px solid ${
+      <div style="position: absolute; bottom: -8px; right: 15px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid ${
         chatSettings.backgroundColor
-      }; box-shadow: 0 -2px 10px rgba(0, 231, 133, 0.2);"></div>
+      }; box-shadow: 0 -1px 5px rgba(0, 231, 133, 0.1);"></div>
     </div>
   </div>
 
@@ -130,8 +262,8 @@ const App = () => {
           widgetContent.style.opacity = '1';
           widgetContent.style.transform = 'translateY(0)';
         }, 10);
-        widgetIcon.style.transform = 'scale(1.15)';
-        widgetIcon.style.boxShadow = '0 10px 30px rgba(0, 231, 133, 0.7)';
+        widgetIcon.style.transform = 'scale(1.1)';
+        widgetIcon.style.boxShadow = '0 6px 15px rgba(0, 231, 133, 0.4)';
       });
 
       widgetContent.addEventListener('mouseover', function () {
@@ -144,12 +276,12 @@ const App = () => {
       widgetContainer.addEventListener('mouseleave', function () {
         timeoutId = setTimeout(() => {
           widgetContent.style.opacity = '0';
-          widgetContent.style.transform = 'translateY(20px)';
+          widgetContent.style.transform = 'translateY(10px)';
           setTimeout(() => {
             widgetContent.style.display = 'none';
-          }, 400);
+          }, 300);
           widgetIcon.style.transform = 'scale(1)';
-          widgetIcon.style.boxShadow = '0 8px 25px rgba(0, 231, 133, 0.5)';
+          widgetIcon.style.boxShadow = '0 4px 10px rgba(0, 231, 133, 0.3)';
         }, 100); // Small delay to allow smooth transition to content
       });
 
@@ -161,13 +293,13 @@ const App = () => {
       });
 
       chatButton.addEventListener('mouseover', function () {
-        chatButton.style.transform = 'translateY(-3px)';
-        chatButton.style.boxShadow = '0 12px 35px rgba(0, 0, 0, 0.4)';
+        chatButton.style.transform = 'translateY(-2px)';
+        chatButton.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.3)';
       });
 
       chatButton.addEventListener('mouseout', function () {
         chatButton.style.transform = 'translateY(0)';
-        chatButton.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.35)';
+        chatButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';
       });
     })();
   </script>
@@ -350,3 +482,146 @@ const App = () => {
 };
 
 export default App;
+
+/*
+<div id="whatsapp-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+  <div id="widget-container" style="position: relative;">
+    <div id="widget-icon" style="width: 50px; height: 50px; background: #00E785; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; z-index: 10001; box-shadow: 0 4px 10px rgba(0, 231, 133, 0.3);">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Chat Icon" style="width: 30px; height: 30px;" />
+    </div>
+    <div id="widget-content" style="display: none; background: #ffffff; padding: 10px; border: 2px solid #00E785; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); position: absolute; bottom: 60px; right: 0; flex-direction: column; align-items: flex-start; gap: 5px; transition: opacity 0.3s ease, transform 0.3s ease; opacity: 0; transform: translateY(10px); z-index: 10000; width: 200px; min-height: 80px;">
+      <div style="background: #00E785; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+        <img src="https://your-aigreen-url.com/logo.svg" alt="AI Green Tick" style="width: 20px; height: 20px; border-radius: 50%;" />
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px; padding: 0 5px;">
+        <strong style="font-size: 14px; color: #1a1a1a; font-weight: 600; line-height: 1.2;">Got any questions?</strong>
+        <span style="font-size: 12px; color: #555; line-height: 1.3;">We're here to help.</span>
+      </div>
+      <button id="chat-button" style="
+        background: #00E785;
+        border: none;
+        border-radius: 5px;
+        padding: 6px 12px;
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-top: 5px;
+      ">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Chat" style="width: 12px; height: 12px; margin-right: 4px; vertical-align: middle;" />
+        Chat with us
+        <span style="margin-left: 4px; vertical-align: middle;">▶</span>
+      </button>
+      <div style="position: absolute; bottom: -8px; right: 15px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #00E785; box-shadow: 0 -1px 5px rgba(0, 231, 133, 0.1);"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const widgetIcon = document.getElementById('widget-icon');
+      const widgetContent = document.getElementById('widget-content');
+      const chatButton = document.getElementById('chat-button');
+      const widgetContainer = document.getElementById('widget-container');
+      const chatWidgetOptions = {
+        brandName: "AI Green Tick",
+        welcomeText: "Hi there!\nHow can I help you?",
+        phoneNumber: "919000012345",
+        messageText: "Hello, %0A I have a question about "+window.location.href+""
+      };
+
+      let timeoutId;
+
+      widgetIcon.addEventListener('mouseover', function () {
+        clearTimeout(timeoutId); // Clear any existing timeout
+        widgetContent.style.display = 'flex';
+        setTimeout(() => {
+          widgetContent.style.opacity = '1';
+          widgetContent.style.transform = 'translateY(0)';
+        }, 10);
+        widgetIcon.style.transform = 'scale(1.1)';
+        widgetIcon.style.boxShadow = '0 6px 15px rgba(0, 231, 133, 0.4)';
+      });
+
+      widgetContent.addEventListener('mouseover', function () {
+        clearTimeout(timeoutId); // Keep widget open while hovering over content
+        widgetContent.style.opacity = '1';
+        widgetContent.style.transform = 'translateY(0)';
+      });
+
+      // Close widget with a delay when leaving the container
+      widgetContainer.addEventListener('mouseleave', function () {
+        timeoutId = setTimeout(() => {
+          widgetContent.style.opacity = '0';
+          widgetContent.style.transform = 'translateY(10px)';
+          setTimeout(() => {
+            widgetContent.style.display = 'none';
+          }, 300);
+          widgetIcon.style.transform = 'scale(1)';
+          widgetIcon.style.boxShadow = '0 4px 10px rgba(0, 231, 133, 0.3)';
+        }, 100); // Small delay to allow smooth transition to content
+      });
+
+      chatButton.addEventListener('click', function () {
+        var msg = encodeURIComponent(chatWidgetOptions.messageText);
+        var phone = chatWidgetOptions.phoneNumber.replace(/\D/g, "");
+        var waURL = "https://wa.me/" + phone + "?text=" + msg;
+        window.open(waURL, "_blank");
+      });
+
+      chatButton.addEventListener('mouseover', function () {
+        chatButton.style.transform = 'translateY(-2px)';
+        chatButton.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.3)';
+      });
+
+      chatButton.addEventListener('mouseout', function () {
+        chatButton.style.transform = 'translateY(0)';
+        chatButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';
+      });
+    })();
+  </script>
+</div>
+*/
+
+/*
+<script>
+                var url = 'https://wati-integration-prod-service.clare.ai/v2/watiWidget.js?79473';
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.async = true;
+                s.src = url;
+                var options = {
+                "enabled":true,
+                "chatButtonSetting":{
+                    "backgroundColor":"#00e785",
+                    "ctaText":"Chat with us",
+                    "borderRadius":"25",
+                    "marginLeft": "0",
+                    "marginRight": "20",
+                    "marginBottom": "20",
+                    "ctaIconWATI":false,
+                    "position":"right"
+                },
+                "brandSetting":{
+                    "brandName":"Webvalor",
+                    "brandSubTitle":"undefined",
+                    "brandImg":"https://www.wati.io/wp-content/uploads/2023/04/Wati-logo.svg",
+                    "welcomeText":"Hi there!\nHow can I help you?",
+                    "messageText":"Got any questions?%0AWe’re here to help.{{page_link}}",
+                    "backgroundColor":"#00e785",
+                    "ctaText":"Chat with us",
+                    "borderRadius":"25",
+                    "autoShow":false,
+                    "phoneNumber":"917240440461"
+                }
+                };
+                s.onload = function() {
+                    CreateWhatsappChatWidget(options);
+                };
+                var x = document.getElementsByTagName('script')[0];
+                x.parentNode.insertBefore(s, x);
+            </script>
+*/
