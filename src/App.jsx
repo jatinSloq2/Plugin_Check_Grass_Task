@@ -32,7 +32,7 @@ const App = () => {
   };
 
   const generatedScript = `<script>
-var url = 'https://aigreentick.com/script.js';
+var url = 'http://localhost:5000/script.js';
 var s = document.createElement('script');
 s.type = 'text/javascript';
 s.async = true;
@@ -138,68 +138,6 @@ x.parentNode.insertBefore(s, x);
                     onChange={(e) => handleChange(e, "chat")}
                   />
                   Bottom-Right
-                </label>
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className="block text-sm mb-1 font-medium">
-                Select CTA Icon
-              </label>
-              <div className="flex gap-4 mt-2">
-                <label
-                  className={`cursor-pointer border rounded p-2 flex items-center gap-2 ${
-                    !chatSettings.ctaIconAIGreenTick
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="ctaIconAIGreenTick"
-                    value={true}
-                    checked={!chatSettings.ctaIconAIGreenTick}
-                    onChange={() =>
-                      setChatSettings({
-                        ...chatSettings,
-                        ctaIconAIGreenTick: true,
-                      })
-                    }
-                    className="hidden"
-                  />
-                  <img
-                    src="http://localhost:5000/logo1.png"
-                    alt="AIGreenTick Logo"
-                    className="w-6 h-6"
-                  />
-                  <span className="text-sm">AIGreenTick</span>
-                </label>
-
-                <label
-                  className={`cursor-pointer border rounded p-2 flex items-center gap-2 ${
-                    chatSettings.ctaIconAIGreenTick
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="ctaIconAIGreenTick"
-                    value={false}
-                    checked={chatSettings.ctaIconAIGreenTick}
-                    onChange={() =>
-                      setChatSettings({
-                        ...chatSettings,
-                        ctaIconAIGreenTick: false,
-                      })
-                    }
-                    className="hidden"
-                  />
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                    alt="WhatsApp Icon"
-                    className="w-6 h-6"
-                  />
-                  <span className="text-sm">WhatsApp</span>
                 </label>
               </div>
             </div>
@@ -356,15 +294,38 @@ x.parentNode.insertBefore(s, x);
       {/* Script Output */}
       {scriptVisible && (
         <div className="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
-          <label className="block font-semibold text-lg mb-2">
-            Copy & Paste the Script:
-          </label>
-          <textarea
-            readOnly
-            rows="20"
-            value={generatedScript}
-            className="w-full font-mono bg-gray-50 border rounded p-3 text-sm"
-          />
+          <div className="mt-6">
+            <label className="block font-semibold text-lg mb-2">
+              Copy & Paste the Script:
+            </label>
+            <textarea
+              readOnly
+              rows="20"
+              value={generatedScript}
+              className="w-full font-mono bg-gray-50 border rounded p-3 text-sm"
+            />
+          </div>
+          <div className="mt-6">
+            <label className="block font-semibold text-lg mb-2">
+              Live Preview:
+            </label>
+            <iframe
+              title="Widget Preview"
+              srcDoc={`<!DOCTYPE html>
+              <html>
+              <head>
+                <style>
+                  body { margin: 0; padding: 0; }
+                </style>
+              </head>
+              <body>
+                ${generatedScript}
+              </body>
+              </html>`}
+              className="w-full h-[400px] border rounded-md"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          </div>
         </div>
       )}
     </div>
