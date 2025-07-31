@@ -1,135 +1,68 @@
+.app-container {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #e6ffe6;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4fdf8;
-  color: black;
-  margin: 0;
-  padding: 0;
+h2 {
+  color: #333;
+  margin-top: 20px;
 }
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Outfit', sans-serif;
+
+.section {
+  margin-bottom: 20px;
 }
-.main-title {
-  text-align: center;
-  color: #28a745;
-}
-.box {
-  background: #f9f9f9;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 8px;
-}
-.form-group {
-  margin-bottom: 15px;
-}
-.form-group label {
+
+label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
+  margin-bottom: 10px;
+  color: #555;
 }
-.form-group input,
-.form-group select,
-.form-group textarea {
+
+input[type="text"],
+input[type="email"],
+input[type="color"],
+textarea {
   width: 100%;
   padding: 8px;
+  margin-top: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
 }
-.generate-btn,
-.copy-btn {
-  background: #28a745;
+
+textarea {
+  height: 60px;
+}
+
+input[type="radio"] {
+  margin-right: 10px;
+}
+
+.action-buttons button {
+  background-color: #25D366;
   color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  margin: 10px 0;
+  margin-right: 10px;
 }
-.generate-btn:hover,
-.copy-btn:hover {
-  background: #1d7a33;
+
+.action-buttons button:hover {
+  background-color: #1DB954;
 }
-.script-box {
+
+.preview {
   margin-top: 20px;
-}
-.script-box textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-family: monospace;
-}
-
-.script-box textarea {
-  width: 100%;
-  height: 180px;
-  font-family: monospace;
-  font-size: 12px;
-  background: #f0fff6;
-  color: #333;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  margin-top: 10px;
-}
-
-.preview-box {
-  margin-top: 40px;
-}
-
-.widget-container {
-  position: relative;
-  height: 100px;
-}
-
-.widget-container.right {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.widget-container.left {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.chat-bubble {
-  position: relative;
-  color: #ffffff;
-  padding: 12px 20px;
-  cursor: pointer;
-  max-width: 220px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  display: inline-block;
-  border: 1px solid #ccc;
-}
-
-.chat-tooltip {
-  display: none;
-  position: absolute;
-  bottom: 130%;
-  left: 0;
-  z-index: 100;
-  width: 220px;
-  background: white;
-  color: black;
-  padding: 12px;
+  text-align: center;
+  padding: 20px;
+  background-color: #f9f9f9;
   border-radius: 10px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  text-align: left;
-}
-
-.chat-bubble:hover .chat-tooltip {
-  display: block;
-}
-
-.brand-img {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: contain;
-  margin-bottom: 8px;
+  min-height: 300px; /* Ensure space for the widget */
+  position: relative;
 }
