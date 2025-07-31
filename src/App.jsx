@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./App.css";
 
 const App = () => {
   const [chatSettings, setChatSettings] = useState({
@@ -11,13 +10,13 @@ const App = () => {
 
   const [brandSettings, setBrandSettings] = useState({
     brandName: "Ai Green Tick",
-    brandImg: "https://www.wati.io/wp-content/uploads/2023/04/Wati-logo.svg",
+    brandImg: "http://localhost:5000/logo1.png",
     welcomeText: "Hi there!\nHow can I help you?",
     messageText: "Hello, I have a question about {{page_link}}",
     backgroundColor: "#fff",
     ctaText: "Chat with us",
     autoShow: false,
-    phoneNumber: "919000012345",
+    phoneNumber: "",
     email: "",
   });
 
@@ -70,29 +69,26 @@ x.parentNode.insertBefore(s, x);
 </script>`;
 
   return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden border border-emerald-300">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-100 p-6">
+      <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl border border-emerald-300 overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-emerald-300 flex justify-between items-center bg-emerald-100">
-          <h1 className="text-xl font-semibold text-emerald-900">
+        <div className="p-5 bg-emerald-100 border-b border-emerald-300 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-emerald-900 tracking-tight">
             Chat Widget Generator
           </h1>
-          <button className="text-gray-700 hover:text-red-500 font-bold text-xl">
+          <button className="text-gray-600 hover:text-red-600 text-2xl leading-none">
             ×
           </button>
         </div>
 
         {/* Chat Settings */}
         <div className="p-6 border-b border-gray-200">
-          <h2 className="font-semibold mb-4 text-gray-700">
-            Button Style:{" "}
-            <span className="font-normal text-sm">
-              All possible & attractive button designs.
-            </span>
+          <h2 className="text-lg font-semibold text-emerald-700 mb-4 border-l-4 border-emerald-400 pl-3">
+            Button Style
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm mb-1 font-medium">
+              <label className="block text-sm font-medium mb-1">
                 Brand Color
               </label>
               <input
@@ -100,12 +96,12 @@ x.parentNode.insertBefore(s, x);
                 name="backgroundColor"
                 value={chatSettings.backgroundColor}
                 onChange={(e) => handleChange(e, "chat")}
-                className="w-full h-12 rounded-md border"
+                className="w-full h-12 rounded-md border shadow-inner"
               />
             </div>
             <div>
-              <label className="block text-sm mb-1 font-medium">
-                Chat Bubble Text (max 24 chars)
+              <label className="block text-sm font-medium mb-1">
+                Chat Bubble Text
               </label>
               <input
                 type="text"
@@ -113,32 +109,24 @@ x.parentNode.insertBefore(s, x);
                 maxLength="24"
                 value={chatSettings.ctaText}
                 onChange={(e) => handleChange(e, "chat")}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-emerald-400"
               />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm mb-1 font-medium">Position</label>
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="position"
-                    value="left"
-                    checked={chatSettings.position === "left"}
-                    onChange={(e) => handleChange(e, "chat")}
-                  />
-                  Bottom-Left
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="position"
-                    value="right"
-                    checked={chatSettings.position === "right"}
-                    onChange={(e) => handleChange(e, "chat")}
-                  />
-                  Bottom-Right
-                </label>
+              <label className="block text-sm font-medium mb-1">Position</label>
+              <div className="flex items-center gap-8 mt-1">
+                {["left", "right"].map((pos) => (
+                  <label key={pos} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="position"
+                      value={pos}
+                      checked={chatSettings.position === pos}
+                      onChange={(e) => handleChange(e, "chat")}
+                    />
+                    Bottom-{pos.charAt(0).toUpperCase() + pos.slice(1)}
+                  </label>
+                ))}
               </div>
             </div>
           </div>
@@ -146,185 +134,164 @@ x.parentNode.insertBefore(s, x);
 
         {/* Brand Settings */}
         <div className="p-6 border-b border-gray-200">
-          <h2 className="font-semibold mb-4 text-gray-700">
+          <h2 className="text-lg font-semibold text-emerald-700 mb-4 border-l-4 border-emerald-400 pl-3">
             Chat Widget Settings
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm mb-1 font-medium">
-                Share your Email ID
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              {
+                label: "Email ID",
+                name: "email",
+                type: "email",
+                placeholder: "Email",
+              },
+              {
+                label: "Phone Number with Country Code",
+                name: "phoneNumber",
+                placeholder: "e.g. 919000012345",
+              },
+              { label: "Brand Name", name: "brandName" },
+              { label: "Brand Image URL", name: "brandImg" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="block text-sm font-medium mb-1">
+                  {field.label}
+                </label>
+                <input
+                  type={field.type || "text"}
+                  name={field.name}
+                  placeholder={field.placeholder || ""}
+                  value={brandSettings[field.name]}
+                  onChange={(e) => handleChange(e, "brand")}
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-emerald-400"
+                  required={true}
+                />
+              </div>
+            ))}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">
+                Pre-filled Message
               </label>
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={brandSettings.email}
-                onChange={(e) => handleChange(e, "brand")}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1 font-medium">
-                Phone Number with Country Code
-              </label>
-              <input
-                type="text"
-                name="phoneNumber"
-                value={brandSettings.phoneNumber}
-                onChange={(e) => handleChange(e, "brand")}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1 font-medium">
-                Brand Name
-              </label>
-              <input
-                type="text"
-                name="brandName"
-                value={brandSettings.brandName}
-                onChange={(e) => handleChange(e, "brand")}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1 font-medium">
-                Pre-filled message (Optional)
-              </label>
+
               <textarea
                 name="messageText"
                 value={brandSettings.messageText}
                 onChange={(e) => handleChange(e, "brand")}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-emerald-400"
               />
+
               <div className="flex mt-2 gap-2">
-                <button className="bg-emerald-500 text-white px-2 py-1 rounded text-sm">
-                  Page Link
-                </button>
-                <button className="bg-emerald-500 text-white px-2 py-1 rounded text-sm">
-                  Page Title
-                </button>
+                {[
+                  { label: "Page Link", value: "{{page_link}}" },
+                  { label: "Page Title", value: "{{page_title}}" },
+                ].map((btn) => (
+                  <button
+                    key={btn.label}
+                    type="button"
+                    onClick={() =>
+                      handleChange(
+                        {
+                          target: {
+                            name: "messageText",
+                            value: brandSettings.messageText + " " + btn.value,
+                          },
+                        },
+                        "brand"
+                      )
+                    }
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded text-sm"
+                  >
+                    {btn.label}
+                  </button>
+                ))}
               </div>
             </div>
+
             <div>
-              <label className="block text-sm mb-1 font-medium">
-                Welcome Text (max 40 chars)
+              <label className="block text-sm font-medium mb-1">
+                Welcome Text
               </label>
               <textarea
                 name="welcomeText"
                 maxLength="40"
                 value={brandSettings.welcomeText}
                 onChange={(e) => handleChange(e, "brand")}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-emerald-400"
               />
             </div>
-            <div>
-              <label className="block text-sm mb-1 font-medium">
-                Brand Image URL
-              </label>
-              <input
-                type="text"
-                name="brandImg"
-                value={brandSettings.brandImg}
-                onChange={(e) => handleChange(e, "brand")}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="col-span-2 flex gap-6 items-center mt-2">
-              <label className="block text-sm font-medium">
-                Open widget by default
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="autoShow"
-                  value={true}
-                  checked={brandSettings.autoShow === true}
-                  onChange={() =>
-                    handleChange(
-                      {
-                        target: {
-                          name: "autoShow",
-                          value: true,
-                          type: "radio",
+            <div className="md:col-span-2 flex items-center gap-6 mt-2">
+              <span className="text-sm font-medium">
+                Open widget by default:
+              </span>
+              {["true", "false"].map((val) => (
+                <label key={val} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="autoShow"
+                    value={val}
+                    checked={brandSettings.autoShow === (val === "true")}
+                    onChange={() =>
+                      handleChange(
+                        {
+                          target: {
+                            name: "autoShow",
+                            value: val === "true",
+                            type: "radio",
+                          },
                         },
-                      },
-                      "brand"
-                    )
-                  }
-                />
-                True
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="autoShow"
-                  value={false}
-                  checked={brandSettings.autoShow === false}
-                  onChange={() =>
-                    handleChange(
-                      {
-                        target: {
-                          name: "autoShow",
-                          value: false,
-                          type: "radio",
-                        },
-                      },
-                      "brand"
-                    )
-                  }
-                />
-                False
-              </label>
+                        "brand"
+                      )
+                    }
+                  />
+                  {val.charAt(0).toUpperCase() + val.slice(1)}
+                </label>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Generate Script */}
+        {/* Generate Script Button */}
         <div className="p-6 text-center">
           <button
             onClick={() => setScriptVisible(!scriptVisible)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded shadow"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg shadow-md font-semibold"
           >
-            Generate Widget Code
+            {scriptVisible ? "Hide" : "Generate"} Widget Code
           </button>
         </div>
       </div>
 
-      {/* Script Output */}
+      {/* Output */}
       {scriptVisible && (
-        <div className="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
-          <div className="mt-6">
-            <label className="block font-semibold text-lg mb-2">
-              Copy & Paste the Script:
-            </label>
-            <textarea
-              readOnly
-              rows="20"
-              value={generatedScript}
-              className="w-full font-mono bg-gray-50 border rounded p-3 text-sm"
-            />
-          </div>
-          <div className="mt-6">
-            <label className="block font-semibold text-lg mb-2">
-              Live Preview:
-            </label>
-            <iframe
-              title="Widget Preview"
-              srcDoc={`<!DOCTYPE html>
-              <html>
-              <head>
-                <style>
-                  body { margin: 0; padding: 0; }
-                </style>
-              </head>
-              <body>
-                ${generatedScript}
-              </body>
-              </html>`}
-              className="w-full h-[400px] border rounded-md"
-              sandbox="allow-scripts allow-same-origin"
-            />
+        <div className="max-w-6xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-lg border border-emerald-200">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Script Section */}
+            <div className="w-full md:w-1/2">
+              <label className="block font-semibold text-lg mb-2">
+                Copy & Paste the Script:
+              </label>
+              <textarea
+                readOnly
+                rows="20"
+                value={generatedScript}
+                className="w-full font-mono bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm focus:outline-none resize-none"
+              />
+            </div>
+
+            {/* Preview Section */}
+            <div className="w-full md:w-1/2">
+              <label className="block font-semibold text-lg mb-2">
+                Live Preview:
+              </label>
+              <div className="bg-gray-50 border border-emerald-200 rounded-lg shadow-inner p-4 h-[400px]">
+                <iframe
+                  title="Widget Preview"
+                  srcDoc={`<!DOCTYPE html><html><body style="margin:0;padding:0;">${generatedScript}</body></html>`}
+                  className="w-full h-full rounded-md border-none"
+                  sandbox="allow-scripts allow-same-origin"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
