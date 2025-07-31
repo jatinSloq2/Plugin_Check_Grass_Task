@@ -5,7 +5,7 @@ const App = () => {
   const [chatSettings, setChatSettings] = useState({
     backgroundColor: "#00e785",
     ctaText: "Chat with us",
-    ctaIconWATI: false,
+    ctaIconAIGreenTick: false,
     position: "right",
   });
 
@@ -46,7 +46,7 @@ var options = {
     "marginLeft": "0",
     "marginRight": "20",
     "marginBottom": "20",
-    "ctaIconWATI": ${chatSettings.ctaIconWATI},
+    "ctaIconAIGreenTick": ${chatSettings.ctaIconAIGreenTick},
     "position": "${chatSettings.position}"
   },
   "brandSetting": {
@@ -148,18 +148,21 @@ x.parentNode.insertBefore(s, x);
               <div className="flex gap-4 mt-2">
                 <label
                   className={`cursor-pointer border rounded p-2 flex items-center gap-2 ${
-                    !chatSettings.ctaIconWATI
+                    !chatSettings.ctaIconAIGreenTick
                       ? "border-emerald-500 bg-emerald-50"
                       : "border-gray-300"
                   }`}
                 >
                   <input
                     type="radio"
-                    name="ctaIconWATI"
+                    name="ctaIconAIGreenTick"
                     value={true}
-                    checked={!chatSettings.ctaIconWATI}
+                    checked={!chatSettings.ctaIconAIGreenTick}
                     onChange={() =>
-                      setChatSettings({ ...chatSettings, ctaIconWATI: true })
+                      setChatSettings({
+                        ...chatSettings,
+                        ctaIconAIGreenTick: true,
+                      })
                     }
                     className="hidden"
                   />
@@ -173,18 +176,21 @@ x.parentNode.insertBefore(s, x);
 
                 <label
                   className={`cursor-pointer border rounded p-2 flex items-center gap-2 ${
-                    chatSettings.ctaIconWATI
+                    chatSettings.ctaIconAIGreenTick
                       ? "border-emerald-500 bg-emerald-50"
                       : "border-gray-300"
                   }`}
                 >
                   <input
                     type="radio"
-                    name="ctaIconWATI"
+                    name="ctaIconAIGreenTick"
                     value={false}
-                    checked={chatSettings.ctaIconWATI}
+                    checked={chatSettings.ctaIconAIGreenTick}
                     onChange={() =>
-                      setChatSettings({ ...chatSettings, ctaIconWATI: false })
+                      setChatSettings({
+                        ...chatSettings,
+                        ctaIconAIGreenTick: false,
+                      })
                     }
                     className="hidden"
                   />
@@ -296,7 +302,7 @@ x.parentNode.insertBefore(s, x);
                   name="autoShow"
                   value={true}
                   checked={brandSettings.autoShow === true}
-                  onChange={(e) =>
+                  onChange={() =>
                     handleChange(
                       {
                         target: {
@@ -317,7 +323,7 @@ x.parentNode.insertBefore(s, x);
                   name="autoShow"
                   value={false}
                   checked={brandSettings.autoShow === false}
-                  onChange={(e) =>
+                  onChange={() =>
                     handleChange(
                       {
                         target: {
