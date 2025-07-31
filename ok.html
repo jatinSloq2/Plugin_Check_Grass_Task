@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Page</title>
+</head>
+
+<body>
+    <h1>Test AI Green Tick Widget</h1>
+    <!-- Paste generated script here -->
+    <script>
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://localhost:5000/script';
+        var options = {
+            enabled: true,
+            chatButtonSetting: {
+                backgroundColor: "#00E785",
+                ctaText: "Chat with us",
+                borderRadius: "25",
+                marginLeft: "20",
+                marginRight: "20",
+                marginBottom: "20",
+                position: "right",
+                ctaIconWATI: false,
+                normalIconUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
+                hoverIconUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
+                mainText: "Got any questions?",
+                subText: "We're here to help."
+            },
+            brandSetting: {
+                brandName: "AI Green Tick",
+                brandSubTitle: "Chat Support",
+                brandImg: "https://aigreentick.com/assets/logo.png",
+                welcomeText: "Hi there!\nHow can I help you?",
+                messageText: "Hello, %0A I have a question about {{page_link}}",
+                backgroundColor: "#00E785",
+                ctaText: "Chat with us",
+                borderRadius: "25",
+                autoShow: false,
+                phoneNumber: "919000012345",
+                altText: "AI Green Tick Logo"
+            }
+        };
+        s.onload = function () {
+            CreateWhatsappChatWidget(options);
+        };
+        var x = document.getElementsByTagName('script')[0];
+        x.parentNode.insertBefore(s, x);
+    </script>
+</body>
+
+</html>

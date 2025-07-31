@@ -6,87 +6,61 @@ body {
   margin: 0;
   padding: 0;
 }
-
 .container {
-  max-width: 900px;
-  color: black;
-  margin: auto;
-  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Outfit', sans-serif;
 }
-
 .main-title {
   text-align: center;
-  color: #0f5132;
-  margin-bottom: 30px;
+  color: #28a745;
 }
-
 .box {
-  background: #ffffff;
-  padding: 25px;
-  margin-bottom: 30px;
-  border-radius: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #f9f9f9;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
 }
-
-h2 {
-  margin-top: 0;
-  color: black;
-  font-size: 1.3rem;
-  color: #11634b;
-}
-
 .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
-
-label {
-  font-weight: 600;
+.form-group label {
+  display: block;
   margin-bottom: 5px;
+  font-weight: 500;
 }
-
-input[type="text"],
-input[type="color"],
-textarea,
-select {
-  padding: 8px 12px;
-  color: black;
-  font-size: 14px;
-  border: 1px solid #c3e6cb;
-  border-radius: 6px;
-  background-color: #f9fffb;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
-
-textarea {
-  min-height: 60px;
-  resize: vertical;
-}
-
 .generate-btn,
 .copy-btn {
-  background-color: #00e785;
-  color: #003c2d;
+  background: #28a745;
+  color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 30px;
+  border-radius: 4px;
   cursor: pointer;
-  font-weight: 600;
-  margin-top: 10px;
-  transition: background-color 0.3s ease;
+  margin: 10px 0;
 }
-
 .generate-btn:hover,
 .copy-btn:hover {
-  background-color: #00c86c;
+  background: #1d7a33;
 }
-
 .script-box {
-  background-color: #e9fff3;
-  padding: 20px;
   margin-top: 20px;
-  border-radius: 10px;
-  border: 1px dashed #67c993;
+}
+.script-box textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 .script-box textarea {
