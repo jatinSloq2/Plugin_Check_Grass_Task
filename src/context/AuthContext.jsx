@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
       setToken(storedToken);
-
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
 
@@ -35,14 +34,9 @@ export const AuthProvider = ({ children }) => {
       if (token && user) {
         setUser(user);
         setToken(token);
-
-        // Save to localStorage
         localStorage.setItem('authUser', JSON.stringify(user));
         localStorage.setItem('authToken', token);
-
-        // Optional: Apply default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
         return { success: true };
       } else {
         return { success: false, message: 'Invalid response from server' };
@@ -57,14 +51,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear localStorage and state
     localStorage.removeItem('authUser');
     localStorage.removeItem('authToken');
-
     setUser(null);
     setToken(null);
-
-    // Clear Axios auth header
     delete axios.defaults.headers.common['Authorization'];
   };
 
