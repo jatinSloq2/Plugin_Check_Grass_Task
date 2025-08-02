@@ -5,7 +5,7 @@ import UnprotectedRoute from "./components/UnprotectedRoute";
 import WidgetPlugin from "./pages/WidgetPlugin";
 import Login from "./pages/login";
 import Home from "./pages/Home";
-import Check from "./pages/check";
+// import Check from "./pages/check";
 import ShopifyPlugin from "./pages/ShopifyPlugin";
 
 function App() {
@@ -37,7 +37,7 @@ function App() {
         }
       />
       <Route path="/" element={<Home />} />
-      <Route path="/check" element={<Check />} />
+      {/* <Route path="/check" element={<Check />} /> */}
     </Routes>
   );
 }
