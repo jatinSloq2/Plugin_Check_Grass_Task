@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async ({ email, password }) => {
     try {
-      const res = await axios.post('http://localhost:3000/auth/login', {
+      const res = await axios.post('http://localhost:3000/api/auth/login', {
         email,
         password,
       });
@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
       const { token, user } = res.data;
 
       if (token && user) {
-        // Save to state
         setUser(user);
         setToken(token);
 

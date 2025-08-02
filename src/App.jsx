@@ -2,11 +2,12 @@ import { Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoutes";
 import UnprotectedRoute from "./components/UnprotectedRoute";
+
 import Home from "./pages/Home";
-import WidgetPlugin from "./pages/WidgetPlugin";
-import Login from "./pages/login";
+import Login from "./pages/Login";
 import ShopifyPlugin from "./pages/ShopifyPlugin";
 import ShopifySites from "./pages/ShopifySite";
+import WidgetPlugin from "./pages/WidgetPlugin";
 
 function App() {
   return (
@@ -21,6 +22,15 @@ function App() {
       />
 
       <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/widget-plugin"
         element={
           <ProtectedRoute>
@@ -28,6 +38,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/shopify-plugin"
         element={
@@ -36,8 +47,15 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Home />} />
-      <Route path="/shopify-site" element={<ShopifySites />} />
+
+      <Route
+        path="/shopify-site"
+        element={
+          <ProtectedRoute>
+            <ShopifySites />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
