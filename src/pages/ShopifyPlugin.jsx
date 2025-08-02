@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export default function ShopifyIntegration() {
   const [shop, setShop] = useState('');
+  const userId = '123456';
 
   const handleConnect = () => {
     let formattedShop = shop.trim().replace(/^https?:\/\//, '');
@@ -10,7 +11,9 @@ export default function ShopifyIntegration() {
       alert('Invalid Shopify store');
       return;
     }
-    window.location.href = `http://localhost:3000/auth/shopify?shop=${formattedShop}`;
+
+    // 👉 Pass userId in the query
+    window.location.href = `http://localhost:3000/auth/shopify?shop=${formattedShop}&userId=${userId}`;
   };
 
   return (
