@@ -4,11 +4,13 @@ export default function ShopifyIntegration() {
   const [shop, setShop] = useState('');
 
   const handleConnect = () => {
-    if (!shop.endsWith('.myshopify.com')) {
-      alert('Invalid shop domain');
+    let formattedShop = shop.trim().replace(/^https?:\/\//, '');
+
+    if (!formattedShop.endsWith('.myshopify.com')) {
+      alert('Invalid Shopify store');
       return;
     }
-    window.location.href = `/auth/shopify?shop=${shop}`;
+    window.location.href = `http://localhost:3000/auth/shopify?shop=${formattedShop}`;
   };
 
   return (
