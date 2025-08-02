@@ -2,11 +2,11 @@ import { Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoutes";
 import UnprotectedRoute from "./components/UnprotectedRoute";
+import Home from "./pages/Home";
 import WidgetPlugin from "./pages/WidgetPlugin";
 import Login from "./pages/login";
-import Home from "./pages/Home";
-// import Check from "./pages/check";
 import ShopifyPlugin from "./pages/ShopifyPlugin";
+import ShopifySites from "./pages/ShopifySite";
 
 function App() {
   return (
@@ -37,7 +37,7 @@ function App() {
         }
       />
       <Route path="/" element={<Home />} />
-      {/* <Route path="/check" element={<Check />} /> */}
+      <Route path="/shopify-site" element={<ShopifySites />} />
     </Routes>
   );
 }

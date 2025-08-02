@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function Dashboard() {
+export default function ShopifySites() {
     const [shop, setShop] = useState('');
 
     useEffect(() => {
