@@ -1,19 +1,23 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function ShopifyIntegration() {
   const [shop, setShop] = useState('');
-  const userId = '123456';
+  const { user } = useAuth();
 
   const handleConnect = () => {
-    let formattedShop = shop.trim().replace(/^https?:\/\//, '');
+    const formattedShop = shop.trim().replace(/^https?:\/\//, '');
 
     if (!formattedShop.endsWith('.myshopify.com')) {
       alert('Invalid Shopify store');
       return;
     }
 
-    // 👉 Pass userId in the query
-    window.location.href = `http://localhost:3000/auth/shopify?shop=${formattedShop}&userId=${userId}`;
+    if (!user?._id) {
+      alert('User not logged in');
+      return;
+    }
+    window.location.href = `http://localhost:3000/auth/shopify?shop=${formattedShop}&userId=${user._id}`;
   };
 
   return (

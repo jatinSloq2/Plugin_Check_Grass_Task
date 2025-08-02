@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user and token from localStorage on app start
   useEffect(() => {
     const storedUser = localStorage.getItem('authUser');
     const storedToken = localStorage.getItem('authToken');
@@ -18,14 +17,12 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(storedUser));
       setToken(storedToken);
 
-      // Optional: Set default header for all axios requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
 
     setLoading(false);
   }, []);
 
-  // Login function using API
   const login = async ({ email, password }) => {
     try {
       const res = await axios.post('http://localhost:3000/auth/login', {

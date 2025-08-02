@@ -1,18 +1,18 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const { token, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
   };
 
   return (
     <div className="min-h-screen bg-green-50 dark:bg-green-950 text-gray-800 dark:text-white flex flex-col items-center justify-center px-4">
-      
+
       {/* Header */}
       <header className="w-full max-w-5xl py-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-green-700 dark:text-green-400">
