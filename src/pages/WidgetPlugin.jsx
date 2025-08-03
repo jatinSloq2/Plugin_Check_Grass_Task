@@ -10,7 +10,7 @@ const Home = () => {
 
   const [brandSettings, setBrandSettings] = useState({
     brandName: "Ai Green Tick",
-    brandImg: "http://localhost:5000/logo1.png",
+    brandImg: "http://localhost:3000/logo1.png",
     welcomeText: "Hi there!\nHow can I help you?",
     messageText: "Hello, I have a question about {{page_link}}",
     backgroundColor: "#fff",
