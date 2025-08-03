@@ -31,42 +31,42 @@ const Home = () => {
   };
 
   const generatedScript = `<script>
-var url = 'http://localhost:3000/api/integration/public-widget.js';
-var s = document.createElement('script');
-s.type = 'text/javascript';
-s.async = true;
-s.src = url;
-var options = {
-  "enabled": true,
-  "chatButtonSetting": {
-    "backgroundColor": "${chatSettings.backgroundColor}",
-    "ctaText": "${chatSettings.ctaText}",
-    "borderRadius": "25",
-    "marginLeft": "0",
-    "marginRight": "20",
-    "marginBottom": "20",
-    "ctaIconAIGreenTick": ${chatSettings.ctaIconAIGreenTick},
-    "position": "${chatSettings.position}"
-  },
-  "brandSetting": {
-    "brandName": "${brandSettings.brandName}",
-    "brandSubTitle": "undefined",
-    "brandImg": "${brandSettings.brandImg}",
-    "welcomeText": \`${brandSettings.welcomeText}\`,
-    "messageText": "${brandSettings.messageText}",
-    "backgroundColor": "${brandSettings.backgroundColor}",
-    "ctaText": "${brandSettings.ctaText}",
-    "borderRadius": "25",
-    "autoShow": ${brandSettings.autoShow},
-    "phoneNumber": "${brandSettings.phoneNumber}"
-  }
-};
-s.onload = function() {
-  CreateWhatsappChatWidget(options);
-};
-var x = document.getElementsByTagName('script')[0];
-x.parentNode.insertBefore(s, x);
-</script>`;
+      var url = 'http://localhost:3000/api/integration/public-widget.js';
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = url;
+      var options = {
+        "enabled": true,
+        "chatButtonSetting": {
+          "backgroundColor": "${chatSettings.backgroundColor}",
+          "ctaText": "${chatSettings.ctaText}",
+          "borderRadius": "25",
+          "marginLeft": "0",
+          "marginRight": "20",
+          "marginBottom": "20",
+          "ctaIconAIGreenTick": ${chatSettings.ctaIconAIGreenTick},
+          "position": "${chatSettings.position}"
+        },
+        "brandSetting": {
+          "brandName": "${brandSettings.brandName}",
+          "brandSubTitle": "undefined",
+          "brandImg": "${brandSettings.brandImg}",
+          "welcomeText": \`${brandSettings.welcomeText}\`,
+          "messageText": "${brandSettings.messageText}",
+          "backgroundColor": "${brandSettings.backgroundColor}",
+          "ctaText": "${brandSettings.ctaText}",
+          "borderRadius": "25",
+          "autoShow": ${brandSettings.autoShow},
+          "phoneNumber": "${brandSettings.phoneNumber}"
+        }
+      };
+      s.onload = function() {
+        CreateWhatsappChatWidget(options);
+      };
+      var x = document.getElementsByTagName('script')[0];
+      x.parentNode.insertBefore(s, x);
+    </script>`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-100 p-6">
