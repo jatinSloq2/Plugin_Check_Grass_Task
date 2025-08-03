@@ -18,7 +18,7 @@ export default function ShopifyIntegration() {
       return;
     }
 
-    window.location.href = `http://localhost:3000/auth/shopify?shop=${formattedShop}&userId=${user.id}`;
+    window.location.href = `https://grasspluginserver.onrender.com/auth/shopify?shop=${formattedShop}&userId=${user.id}`;
   };
 
   return (

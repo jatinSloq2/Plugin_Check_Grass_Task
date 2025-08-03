@@ -18,7 +18,7 @@ export default function ShopifySites() {
   useEffect(() => {
     const fetchShops = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:3000/shop-tokens/${userId}`);
+        const { data } = await axios.get(`https://grasspluginserver.onrender.com/shop-tokens/${userId}`);
         if (data.length > 0) {
           setShops(data);
           setSelectedShop(data[0].shop);
@@ -56,7 +56,7 @@ export default function ShopifySites() {
 
   const handleSave = async () => {
     try {
-      await axios.put(`http://localhost:3000/shop-tokens/update/${selectedShop}`, {
+      await axios.put(`https://grasspluginserver.onrender.com/shop-tokens/update/${selectedShop}`, {
         ...widgetSettings
       });
       setHasChanges(false);
@@ -118,11 +118,9 @@ export default function ShopifySites() {
             />
 
             <div className="flex justify-between pt-6">
-              {hasChanges && widgetSettings.widgetEnabled && (
                 <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded">
                   Save
                 </button>
-              )}
             </div>
           </div>
         ) : (
