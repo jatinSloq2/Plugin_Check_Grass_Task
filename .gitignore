@@ -7,18 +7,123 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependency directories
+node_modules/
 
-# Editor directories and files
+# Build output
+dist/
+dist-ssr/
+out/
+build/
+.tmp/
+.temp/
+
+# Local env files
+.env
+.env.*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor settings
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Stylelint cache
+.stylelintcache
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# Test output
+test-results/
+jest-coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Parcel cache
+.cache/
+.parcel-cache/
+
+# Vite cache
+node_modules/.vite/
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+.nuxt-dist/
+
+# Svelte
+.svelte-kit/
+.svelte/
+
+# Remix
+build/
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Storybook
+.storybook-out/
+storybook-static/
+
+# TernJS
+.tern-port
+
+# PM2 logs
+pids
+*.pid
+*.seed
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Prisma
+prisma/migrations/
+
+# TurboRepo
+turbo/
+.turbo/
+
+# Mac M1 node-gyp build cache
+*.node
+
+# VSCode settings backup
+.history/
+
+# Local database dumps
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Yarn Plug'n'Play
+.pnp.*

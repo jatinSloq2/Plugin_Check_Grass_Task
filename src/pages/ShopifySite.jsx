@@ -3,6 +3,10 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import WidgetPlugin from '../components/Shopify/WidgetPlugin';
 
+// Dummy components for Test1 and Test2 sections
+const Test1Component = () => <div className="bg-white p-6 rounded shadow">This is <strong>Test 1</strong> content.</div>;
+const Test2Component = () => <div className="bg-white p-6 rounded shadow">This is <strong>Test 2</strong> content.</div>;
+
 export default function ShopifySites() {
   const { user } = useAuth();
   const [shops, setShops] = useState([]);
@@ -15,50 +19,56 @@ export default function ShopifySites() {
 
   const userId = user?.id;
 
+  // Fetch shop list on initial load
   useEffect(() => {
+    if (!userId) return;
     const fetchShops = async () => {
       try {
-        const { data } = await axios.get(`https://grasspluginserver.onrender.com/shop-tokens/${userId}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/${userId}`);
+        setShops(data);
         if (data.length > 0) {
-          setShops(data);
           setSelectedShop(data[0].shop);
-          setWidgetSettings({
-            chatSettings: data[0].chatSettings || {},
-            brandSettings: data[0].brandSettings || {},
-            widgetEnabled: data[0].widgetEnabled || false
-          });
         } else {
           setError('No shops found for this user.');
         }
       } catch (err) {
-        console.error('Failed to fetch shop tokens:', err);
+        console.error('Failed to fetch shops:', err);
         setError('Error fetching shops.');
       } finally {
         setLoading(false);
       }
     };
-
-    if (userId) fetchShops();
+    fetchShops();
   }, [userId]);
 
+  // Fetch settings when selectedShop changes
+  useEffect(() => {
+    if (!selectedShop) return;
+    const fetchSettings = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/single/${selectedShop}`);
+        console.log('Fetched settings:', data);
+        setWidgetSettings({
+          chatSettings: data.chatSettings || {},
+          brandSettings: data.brandSettings || {},
+          widgetEnabled: data.widgetEnabled || false
+        });
+        setHasChanges(false);
+      } catch (err) {
+        console.error('Failed to fetch shop settings:', err);
+        setError('Failed to load settings for selected shop.');
+      }
+    };
+    fetchSettings();
+  }, [selectedShop]);
+
   const handleShopChange = (e) => {
-    const shopDomain = e.target.value;
-    const selected = shops.find(s => s.shop === shopDomain);
-    setSelectedShop(shopDomain);
-    if (selected) {
-      setWidgetSettings({
-        chatSettings: selected.chatSettings || {},
-        brandSettings: selected.brandSettings || {},
-        widgetEnabled: selected.widgetEnabled || false
-      });
-    }
+    setSelectedShop(e.target.value);
   };
 
   const handleSave = async () => {
     try {
-      await axios.put(`https://grasspluginserver.onrender.com/shop-tokens/update/${selectedShop}`, {
-        ...widgetSettings
-      });
+      await axios.put(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/update/${selectedShop}`, widgetSettings);
       setHasChanges(false);
       alert('Widget settings saved!');
     } catch (err) {
@@ -67,66 +77,90 @@ export default function ShopifySites() {
     }
   };
 
+  const sectionClass = (section) =>
+    `w-full text-left px-4 py-2 rounded transition ${
+      selectedSection === section
+        ? 'bg-emerald-600 text-white'
+        : 'bg-gray-50 hover:bg-emerald-100 text-gray-800'
+    }`;
+
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md border-r border-gray-200 p-6 space-y-6">
+      <aside className="w-64 bg-white shadow-md border-r border-gray-200 p-6 space-y-6">
         <div>
-          <label htmlFor="shopSelector" className="block text-sm text-gray-700 mb-1">Select Store:</label>
+          <label htmlFor="shopSelector" className="block text-sm font-medium text-gray-700 mb-1">
+            Select Store:
+          </label>
           <select
             id="shopSelector"
             value={selectedShop}
             onChange={handleShopChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
           >
             {shops.map((shop, index) => (
-              <option key={index} value={shop.shop}>{shop.shop}</option>
+              <option key={index} value={shop.shop}>
+                {shop.shop}
+              </option>
             ))}
           </select>
         </div>
 
-        <nav className="space-y-3">
-          <button onClick={() => setSelectedSection('widget')} className="w-full text-left px-4 py-2 bg-emerald-100 hover:bg-emerald-200 rounded">
+        <nav className="space-y-2">
+          <button onClick={() => setSelectedSection('widget')} className={sectionClass('widget')}>
             🧩 Widget
           </button>
-          <button onClick={() => setSelectedSection('test1')} className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">
+          <button onClick={() => setSelectedSection('test1')} className={sectionClass('test1')}>
             🧪 Test1
           </button>
-          <button onClick={() => setSelectedSection('test2')} className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">
+          <button onClick={() => setSelectedSection('test2')} className={sectionClass('test2')}>
             🧪 Test2
           </button>
         </nav>
-      </div>
+      </aside>
 
-      {/* Content */}
-      <div className="flex-1 p-8">
+      {/* Main Content */}
+      <main className="flex-1 p-8 overflow-y-auto">
         {loading ? (
           <p>Loading...</p>
         ) : error ? (
           <p className="text-red-500">{error}</p>
-        ) : selectedSection === 'widget' ? (
-          <div className="max-w-xl bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-bold mb-4">Widget Settings for {selectedShop}</h2>
-
-            <WidgetPlugin
-              settings={widgetSettings}
-              widgetEnabled={widgetSettings.widgetEnabled}
-              onChange={(newSettings) => {
-                setWidgetSettings(newSettings);
-                setHasChanges(true);
-              }}
-            />
-
-            <div className="flex justify-between pt-6">
-                <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded">
-                  Save
-                </button>
-            </div>
-          </div>
         ) : (
-          <p className="text-gray-700">You selected: <strong>{selectedSection}</strong></p>
+          <>
+            {selectedSection === 'widget' && (
+              <div className="max-w-3xl bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">Widget Settings for {selectedShop}</h2>
+
+                <WidgetPlugin
+                  settings={widgetSettings}
+                  widgetEnabled={widgetSettings.widgetEnabled}
+                  onChange={(newSettings) => {
+                    setWidgetSettings(newSettings);
+                    setHasChanges(true);
+                  }}
+                />
+
+                <div className="pt-6 flex justify-end">
+                  <button
+                    onClick={handleSave}
+                    disabled={!hasChanges}
+                    className={`px-5 py-2 rounded font-semibold transition ${
+                      hasChanges
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {selectedSection === 'test1' && <Test1Component />}
+            {selectedSection === 'test2' && <Test2Component />}
+          </>
         )}
-      </div>
+      </main>
     </div>
   );
 }

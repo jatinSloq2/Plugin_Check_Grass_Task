@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
-export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async ({ email, password }) => {
     try {
-      const res = await axios.post('https://grasspluginserver.onrender.com/api/auth/login', {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/login`, {
         email,
         password,
       });
@@ -64,3 +63,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

@@ -10,7 +10,7 @@ const Home = () => {
 
   const [brandSettings, setBrandSettings] = useState({
     brandName: "Ai Green Tick",
-    brandImg: "https://grasspluginserver.onrender.com/logo1.png",
+    brandImg: `${import.meta.env.VITE_SERVER_URL}/logo1.png`,
     welcomeText: "Hi there!\nHow can I help you?",
     messageText: "Hello, I have a question about {{page_link}}",
     backgroundColor: "#fff",
@@ -31,7 +31,7 @@ const Home = () => {
   };
 
   const generatedScript = `<script>
-      var url = 'https://grasspluginserver.onrender.com/api/integration/public-widget.js';
+      var url = '${import.meta.env.VITE_SERVER_URL}/api/integration/public-widget.js';
       var s = document.createElement('script');
       s.type = 'text/javascript';
       s.async = true;
