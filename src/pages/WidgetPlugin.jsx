@@ -31,7 +31,7 @@ const Home = () => {
   };
 
   const generatedScript = `<script>
-var url = 'http://localhost:5000/script.js';
+var url = 'http://localhost:3000/api/integration/public-widget.js';
 var s = document.createElement('script');
 s.type = 'text/javascript';
 s.async = true;
