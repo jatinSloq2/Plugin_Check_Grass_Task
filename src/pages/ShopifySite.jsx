@@ -80,6 +80,31 @@ export default function ShopifySites() {
     }
   };
 
+  const handleDeleteShop = async () => {
+    if (!selectedShop) return alert("Please select a shop to delete.");
+
+    const confirmDelete = confirm(`Are you sure you want to delete the shop: ${selectedShop}?`);
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/delete/${selectedShop}`);
+      const updatedShops = shops.filter((shop) => shop.shop !== selectedShop);
+      setShops(updatedShops);
+
+      if (updatedShops.length > 0) {
+        setSelectedShop(updatedShops[0].shop);
+      } else {
+        setSelectedShop('');
+        setError('No shops remaining.');
+      }
+
+      alert(`Shop ${selectedShop} deleted successfully.`);
+    } catch (err) {
+      console.error('Failed to delete shop:', err);
+      alert('Error deleting shop.');
+    }
+  };
+
   const sectionClass = (section) =>
     `w-full text-left px-4 py-2 rounded transition ${selectedSection === section
       ? 'bg-emerald-600 text-white'
@@ -106,6 +131,13 @@ export default function ShopifySites() {
               </option>
             ))}
           </select>
+
+          <button
+            onClick={handleDeleteShop}
+            className="mt-3 w-full bg-red-600 text-white py-2 px-3 rounded hover:bg-red-700 transition"
+          >
+            🗑️ Delete Shop
+          </button>
         </div>
 
         <nav className="space-y-2">
@@ -144,8 +176,8 @@ export default function ShopifySites() {
                     onClick={handleSave}
                     disabled={!hasChanges}
                     className={`px-5 py-2 rounded font-semibold transition ${hasChanges
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                   >
                     Save Changes
@@ -170,8 +202,8 @@ export default function ShopifySites() {
                     onClick={handleSave}
                     disabled={!hasChanges}
                     className={`px-5 py-2 rounded font-semibold transition ${hasChanges
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                   >
                     Save Changes
