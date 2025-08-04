@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import WidgetPlugin from '../components/Shopify/WidgetPlugin';
+import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
 
 // Dummy components for Test1 and Test2 sections
 const Test1Component = () => <div className="bg-white p-6 rounded shadow">This is <strong>Test 1</strong> content.</div>;
@@ -51,7 +52,9 @@ export default function ShopifySites() {
         setWidgetSettings({
           chatSettings: data.chatSettings || {},
           brandSettings: data.brandSettings || {},
-          widgetEnabled: data.widgetEnabled || false
+          widgetEnabled: data.widgetEnabled || false,
+          automatedMsg: data.automatedMsg || {}
+
         });
         setHasChanges(false);
       } catch (err) {
@@ -78,10 +81,9 @@ export default function ShopifySites() {
   };
 
   const sectionClass = (section) =>
-    `w-full text-left px-4 py-2 rounded transition ${
-      selectedSection === section
-        ? 'bg-emerald-600 text-white'
-        : 'bg-gray-50 hover:bg-emerald-100 text-gray-800'
+    `w-full text-left px-4 py-2 rounded transition ${selectedSection === section
+      ? 'bg-emerald-600 text-white'
+      : 'bg-gray-50 hover:bg-emerald-100 text-gray-800'
     }`;
 
   return (
@@ -110,11 +112,8 @@ export default function ShopifySites() {
           <button onClick={() => setSelectedSection('widget')} className={sectionClass('widget')}>
             🧩 Widget
           </button>
-          <button onClick={() => setSelectedSection('test1')} className={sectionClass('test1')}>
-            🧪 Test1
-          </button>
-          <button onClick={() => setSelectedSection('test2')} className={sectionClass('test2')}>
-            🧪 Test2
+          <button onClick={() => setSelectedSection('automatedMsg')} className={sectionClass('automatedMsg')}>
+            🧪 Automated Messages
           </button>
         </nav>
       </aside>
@@ -144,11 +143,36 @@ export default function ShopifySites() {
                   <button
                     onClick={handleSave}
                     disabled={!hasChanges}
-                    className={`px-5 py-2 rounded font-semibold transition ${
-                      hasChanges
+                    className={`px-5 py-2 rounded font-semibold transition ${hasChanges
                         ? 'bg-green-600 hover:bg-green-700 text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                      }`}
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            )}
+            {selectedSection === 'automatedMsg' && (
+              <div className="max-w-3xl bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">Automated Message Settings for {selectedShop}</h2>
+
+                <AutomatedMsgSettings
+                  settings={widgetSettings.automatedMsg}
+                  onChange={(updatedAutomatedMsg) => {
+                    setWidgetSettings((prev) => ({ ...prev, automatedMsg: updatedAutomatedMsg }));
+                    setHasChanges(true);
+                  }}
+                />
+
+                <div className="pt-6 flex justify-end">
+                  <button
+                    onClick={handleSave}
+                    disabled={!hasChanges}
+                    className={`px-5 py-2 rounded font-semibold transition ${hasChanges
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
                   >
                     Save Changes
                   </button>
@@ -156,8 +180,6 @@ export default function ShopifySites() {
               </div>
             )}
 
-            {selectedSection === 'test1' && <Test1Component />}
-            {selectedSection === 'test2' && <Test2Component />}
           </>
         )}
       </main>
