@@ -20,7 +20,6 @@ export default function ShopifySites() {
 
   const userId = user?.id;
 
-  // Fetch shop list on initial load
   useEffect(() => {
     if (!userId) return;
     const fetchShops = async () => {
@@ -42,7 +41,6 @@ export default function ShopifySites() {
     fetchShops();
   }, [userId]);
 
-  // Fetch settings when selectedShop changes
   useEffect(() => {
     if (!selectedShop) return;
     const fetchSettings = async () => {
@@ -54,7 +52,6 @@ export default function ShopifySites() {
           brandSettings: data.brandSettings || {},
           widgetEnabled: data.widgetEnabled || false,
           automatedMsg: data.automatedMsg || {}
-
         });
         setHasChanges(false);
       } catch (err) {
@@ -159,7 +156,7 @@ export default function ShopifySites() {
         ) : (
           <>
             {selectedSection === 'widget' && (
-              <div className="max-w-3xl bg-white shadow rounded-lg p-6">
+              <div className="w-full bg-white shadow rounded-lg p-6">
                 <h2 className="text-xl font-bold mb-4">Widget Settings for {selectedShop}</h2>
 
                 <WidgetPlugin
@@ -185,8 +182,9 @@ export default function ShopifySites() {
                 </div>
               </div>
             )}
+
             {selectedSection === 'automatedMsg' && (
-              <div className="max-w-3xl bg-white shadow rounded-lg p-6">
+              <div className="w-full bg-white shadow rounded-lg p-6">
                 <h2 className="text-xl font-bold mb-4">Automated Message Settings for {selectedShop}</h2>
 
                 <AutomatedMsgSettings
@@ -211,7 +209,6 @@ export default function ShopifySites() {
                 </div>
               </div>
             )}
-
           </>
         )}
       </main>
