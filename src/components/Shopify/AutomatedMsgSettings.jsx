@@ -44,7 +44,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         if (JSON.stringify(settings) !== JSON.stringify(localSettings)) {
             setLocalSettings(settings);
         }
-    }, [settings]);
+    }, [settings, localSettings]);
 
     // Fetch selected template body by ID
     const fetchTemplateById = async (id) => {
@@ -58,8 +58,8 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                 }
             });
             const json = await res.json();
-            const components = json?.data?.components || [];
-
+            const components = json?.components || [];
+            console.log(components)
             const body = components.find(c => c.type === 'BODY')?.text || 'No preview available';
             const header = components.find(c => c.type === 'HEADER');
 
