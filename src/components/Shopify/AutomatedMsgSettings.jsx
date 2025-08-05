@@ -7,7 +7,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         if (JSON.stringify(settings) !== JSON.stringify(localSettings)) {
             setLocalSettings(settings);
         }
-    }, [settings]);
+    }, [settings, localSettings]);
 
     const handleToggle = (type, enabled) => {
         const updated = {
