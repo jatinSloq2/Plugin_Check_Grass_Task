@@ -6,11 +6,11 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
     const [templates, setTemplates] = useState([]);
     const [templateDetails, setTemplateDetails] = useState({});
     const [loadingId, setLoadingId] = useState(null);
-
+    console.log("localSettings", localSettings)
+    console.log("settings", settings)
     const { user } = useAuth();
     const api_token = user?.api_token;
 
-    // Fetch all templates for dropdown selection
     useEffect(() => {
         const fetchTemplates = async () => {
             if (!api_token) return;
@@ -39,14 +39,31 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         fetchTemplates();
     }, [api_token]);
 
-    // Sync with external settings
     useEffect(() => {
         if (JSON.stringify(settings) !== JSON.stringify(localSettings)) {
             setLocalSettings(settings);
         }
     }, [settings, localSettings]);
 
-    // Fetch selected template body by ID
+    useEffect(() => {
+        const templateIds = new Set();
+
+        ['orderCreated', 'orderFulfilled', 'orderCanceled'].forEach(type => {
+            const id = settings?.[type]?.templateId;
+            if (id) templateIds.add(id);
+        });
+
+        settings?.cartAbandoned?.messages?.forEach(msg => {
+            if (msg?.templateId) templateIds.add(msg.templateId);
+        });
+
+        templateIds.forEach(id => {
+            if (!templateDetails[id]) {
+                fetchTemplateById(id);
+            }
+        });
+    }, [settings, templateDetails]);
+
     const fetchTemplateById = async (id) => {
         if (!id || templateDetails[id] || !api_token) return;
 
@@ -301,7 +318,9 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                     <input
                                         type="checkbox"
                                         checked={msg.enabled}
-                                        onChange={(e) => updateCartAbandonedMessage(index, 'enabled', e.target.checked)}
+                                        onChange={(e) =>
+                                            updateCartAbandonedMessage(index, 'enabled', e.target.checked)
+                                        }
                                     />
                                     <span>Enabled</span>
                                 </label>
@@ -314,7 +333,9 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                         type="number"
                                         className="w-24 border rounded px-2 py-1"
                                         value={msg.delay?.value || 0}
-                                        onChange={(e) => updateCartAbandonedDelay(index, 'value', Number(e.target.value))}
+                                        onChange={(e) =>
+                                            updateCartAbandonedDelay(index, 'value', Number(e.target.value))
+                                        }
                                     />
                                 </div>
                                 <div>
@@ -322,7 +343,9 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                     <select
                                         className="border rounded px-2 py-1"
                                         value={msg.delay?.unit || 'minutes'}
-                                        onChange={(e) => updateCartAbandonedDelay(index, 'unit', e.target.value)}
+                                        onChange={(e) =>
+                                            updateCartAbandonedDelay(index, 'unit', e.target.value)
+                                        }
                                     >
                                         <option value="minutes">Minutes</option>
                                         <option value="hours">Hours</option>
@@ -335,16 +358,25 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                 <label className="block text-sm font-medium mb-1">Select Template</label>
                                 <select
                                     className="w-full border rounded px-3 py-2"
-                                    value={msg.templateId || ''}
+                                    value={String(msg.templateId || '')}
                                     onChange={(e) =>
                                         updateCartAbandonedMessage(index, 'templateId', e.target.value)
                                     }
                                 >
                                     <option value="">-- Select a Template --</option>
                                     {templates.map((tpl) => (
-                                        <option key={tpl.id} value={tpl.id}>{tpl.name} ({tpl.id})</option>
+                                        <option key={tpl.id} value={String(tpl.id)}>
+                                            {tpl.name} ({tpl.id})
+                                        </option>
                                     ))}
                                 </select>
+
+                                {msg.templateId && (
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        Selected: {templates.find(t => String(t.id) === String(msg.templateId))?.name || 'Unknown Template'}
+                                    </div>
+                                )}
+
                                 {renderTemplatePreview(msg.templateId)}
                             </div>
                         </div>
