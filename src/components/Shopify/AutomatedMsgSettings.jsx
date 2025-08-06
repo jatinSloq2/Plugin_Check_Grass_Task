@@ -6,8 +6,6 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
     const [templates, setTemplates] = useState([]);
     const [templateDetails, setTemplateDetails] = useState({});
     const [loadingId, setLoadingId] = useState(null);
-    console.log("localSettings", localSettings)
-    console.log("settings", settings)
     const { user } = useAuth();
     const api_token = user?.api_token;
 
@@ -413,20 +411,62 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                 </div>
 
                 {fallback.enabled && (
-                    <div className="mb-3">
-                        <label className="block text-sm font-medium mb-1">Select Template</label>
-                        <select
-                            className="w-full border rounded px-3 py-2"
-                            value={fallback.templateId || ''}
-                            onChange={(e) => handleInputChange(type, 'templateId', e.target.value)}
-                        >
-                            <option value="">-- Select a Template --</option>
-                            {templates.map((tpl) => (
-                                <option key={tpl.id} value={tpl.id}>{tpl.name} ({tpl.id})</option>
-                            ))}
-                        </select>
-                        {renderTemplatePreview(fallback.templateId)}
-                    </div>
+                    <>
+                        {/* Delay Settings – only if delay is present */}
+                        {fallback.delay && (
+                            <div className="mb-3 flex items-center gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Delay Value</label>
+                                    <input
+                                        type="number"
+                                        className="w-24 border rounded px-2 py-1"
+                                        value={fallback.delay?.value || 0}
+                                        onChange={(e) =>
+                                            handleInputChange(type, 'delay', {
+                                                ...fallback.delay,
+                                                value: Number(e.target.value)
+                                            })
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Delay Unit</label>
+                                    <select
+                                        className="border rounded px-2 py-1"
+                                        value={fallback.delay?.unit || 'minutes'}
+                                        onChange={(e) =>
+                                            handleInputChange(type, 'delay', {
+                                                ...fallback.delay,
+                                                unit: e.target.value
+                                            })
+                                        }
+                                    >
+                                        <option value="minutes">Minutes</option>
+                                        <option value="hours">Hours</option>
+                                        <option value="days">Days</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Template Dropdown */}
+                        <div className="mb-3">
+                            <label className="block text-sm font-medium mb-1">Select Template</label>
+                            <select
+                                className="w-full border rounded px-3 py-2"
+                                value={fallback.templateId || ''}
+                                onChange={(e) => handleInputChange(type, 'templateId', e.target.value)}
+                            >
+                                <option value="">-- Select a Template --</option>
+                                {templates.map((tpl) => (
+                                    <option key={tpl.id} value={tpl.id}>
+                                        {tpl.name} ({tpl.id})
+                                    </option>
+                                ))}
+                            </select>
+                            {renderTemplatePreview(fallback.templateId)}
+                        </div>
+                    </>
                 )}
             </div>
         );
@@ -436,8 +476,9 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         <div className="p-6 bg-gray-100 rounded-lg shadow">
             {renderLeftText()}
             {renderMsgType('orderCreated', 'Order Created')}
-            {renderMsgType('orderFulfilled', 'Order Fulfilled')}
             {renderMsgType('orderCanceled', 'Order Canceled')}
+            {renderMsgType('orderFulfilled', 'Order Fulfilled')}
+            {renderMsgType('afterOrderFulfilled', 'After Order Fulfilled')}
             {renderMsgType('cartAbandoned', 'Cart Abandoned')}
         </div>
     );
