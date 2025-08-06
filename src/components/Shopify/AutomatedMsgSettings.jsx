@@ -166,7 +166,6 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
             <div className="bg-gray-50 border border-gray-300 p-3 rounded mt-2 text-sm text-gray-700">
                 <strong>Preview:</strong>
                 <div className="mt-2 space-y-2">
-
                     {components.map((component, i) => {
                         if (component.type === 'HEADER') {
                             if (component.format === 'IMAGE' && component.image_url) {
@@ -177,6 +176,17 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                         alt="Header"
                                         className="max-w-full h-auto rounded border"
                                     />
+                                );
+                            } else if (component.format === 'VIDEO' && component.image_url) {
+                                return (
+                                    <video
+                                        key={i}
+                                        controls
+                                        className="max-w-full h-auto rounded border"
+                                    >
+                                        <source src={component.image_url} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
                                 );
                             } else if (component.format === 'TEXT' && component.text) {
                                 return <p key={i} className="font-semibold">{component.text}</p>;
@@ -236,6 +246,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
 
                         return null;
                     })}
+
                 </div>
             </div>
         );
