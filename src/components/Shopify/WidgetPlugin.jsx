@@ -1,4 +1,5 @@
 export default function WidgetPlugin({ settings, widgetEnabled, onChange }) {
+    console.log("settings", settings)
     const chat = settings.chatSettings || {};
     const brand = settings.brandSettings || {};
 
@@ -157,8 +158,29 @@ export default function WidgetPlugin({ settings, widgetEnabled, onChange }) {
                                         className="w-full p-2 border rounded-md focus:ring-2 focus:ring-emerald-400"
                                     />
                                 </div>
+
+                                {/* Auto Show Checkbox */}
+                                <div className="md:col-span-2 flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="autoShow"
+                                        checked={brand.autoShow ?? true}
+                                        onChange={(e) =>
+                                            onChange({
+                                                ...settings,
+                                                brandSettings: { ...brand, autoShow: e.target.checked },
+                                            })
+                                        }
+                                        disabled={!widgetEnabled}
+                                        className="h-4 w-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-400"
+                                    />
+                                    <label htmlFor="autoShow" className="text-sm font-medium text-gray-700">
+                                        Auto Show
+                                    </label>
+                                </div>
                             </div>
                         </div>
+
                     </>
                 )}
             </div>
