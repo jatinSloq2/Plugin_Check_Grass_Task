@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import WidgetPlugin from '../components/Shopify/WidgetPlugin';
 import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
+import { Trash2, Puzzle, MessageCircle, Save } from 'lucide-react';
 
 export default function ShopifySites() {
   const { user } = useAuth();
@@ -76,7 +77,7 @@ export default function ShopifySites() {
       setShops(updatedShops);
       setSelectedShop(updatedShops[0]?.shop || '');
       if (!updatedShops.length) setError('No stores remaining.');
-      alert(`🗑️ Deleted ${selectedShop}`);
+      alert(`Deleted ${selectedShop}`);
     } catch (err) {
       console.error(err);
       alert('Error deleting shop.');
@@ -84,7 +85,7 @@ export default function ShopifySites() {
   };
 
   const sectionClass = (section) =>
-    `w-full text-left px-4 py-2 rounded-md transition-all font-medium ${
+    `w-full flex items-center gap-2 text-left px-4 py-2 rounded-md transition-all font-medium ${
       selectedSection === section
         ? 'bg-emerald-600 text-white shadow'
         : 'bg-gray-100 hover:bg-emerald-100 text-gray-700'
@@ -111,18 +112,18 @@ export default function ShopifySites() {
 
           <button
             onClick={handleDeleteShop}
-            className="mt-4 w-full text-sm bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-md transition"
+            className="mt-4 w-full text-sm bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-md transition flex items-center justify-center gap-2"
           >
-            🗑️ Delete Store
+            <Trash2 size={16} /> Delete Store
           </button>
         </div>
 
         <nav className="space-y-2">
           <button onClick={() => setSelectedSection('widget')} className={sectionClass('widget')}>
-            🧩 Widget Settings
+            <Puzzle size={18} /> Widget Settings
           </button>
           <button onClick={() => setSelectedSection('automatedMsg')} className={sectionClass('automatedMsg')}>
-            💬 Automated Messages
+            <MessageCircle size={18} /> Automated Messages
           </button>
         </nav>
       </aside>
@@ -154,13 +155,13 @@ export default function ShopifySites() {
                   <button
                     onClick={handleSave}
                     disabled={!hasChanges}
-                    className={`px-6 py-2 rounded-md font-semibold transition ${
+                    className={`flex items-center gap-2 px-6 py-2 rounded-md font-semibold transition ${
                       hasChanges
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    💾 Save Changes
+                    <Save size={16} /> Save Changes
                   </button>
                 </div>
               </section>
@@ -184,13 +185,13 @@ export default function ShopifySites() {
                   <button
                     onClick={handleSave}
                     disabled={!hasChanges}
-                    className={`px-6 py-2 rounded-md font-semibold transition ${
+                    className={`flex items-center gap-2 px-6 py-2 rounded-md font-semibold transition ${
                       hasChanges
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    💾 Save Changes
+                    <Save size={16} /> Save Changes
                   </button>
                 </div>
               </section>
