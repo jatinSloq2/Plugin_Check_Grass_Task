@@ -4,10 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import WidgetPlugin from '../components/Shopify/WidgetPlugin';
 import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
 
-// Dummy components for Test1 and Test2 sections
-const Test1Component = () => <div className="bg-white p-6 rounded shadow">This is <strong>Test 1</strong> content.</div>;
-const Test2Component = () => <div className="bg-white p-6 rounded shadow">This is <strong>Test 2</strong> content.</div>;
-
 export default function ShopifySites() {
   const { user } = useAuth();
   const [shops, setShops] = useState([]);
@@ -17,7 +13,6 @@ export default function ShopifySites() {
   const [error, setError] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
   const [widgetSettings, setWidgetSettings] = useState({});
-
   const userId = user?.id;
 
   useEffect(() => {
@@ -26,14 +21,11 @@ export default function ShopifySites() {
       try {
         const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/${userId}`);
         setShops(data);
-        if (data.length > 0) {
-          setSelectedShop(data[0].shop);
-        } else {
-          setError('No shops found for this user.');
-        }
+        if (data.length > 0) setSelectedShop(data[0].shop);
+        else setError('No connected stores found.');
       } catch (err) {
-        console.error('Failed to fetch shops:', err);
-        setError('Error fetching shops.');
+        console.error(err);
+        setError('Failed to load stores.');
       } finally {
         setLoading(false);
       }
@@ -46,7 +38,6 @@ export default function ShopifySites() {
     const fetchSettings = async () => {
       try {
         const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/single/${selectedShop}`);
-        console.log('Fetched settings:', data);
         setWidgetSettings({
           chatSettings: data.chatSettings || {},
           brandSettings: data.brandSettings || {},
@@ -55,66 +46,57 @@ export default function ShopifySites() {
         });
         setHasChanges(false);
       } catch (err) {
-        console.error('Failed to fetch shop settings:', err);
-        setError('Failed to load settings for selected shop.');
+        console.error(err);
+        setError('Could not load store settings.');
       }
     };
     fetchSettings();
   }, [selectedShop]);
 
-  const handleShopChange = (e) => {
-    setSelectedShop(e.target.value);
-  };
+  const handleShopChange = (e) => setSelectedShop(e.target.value);
 
   const handleSave = async () => {
     try {
       await axios.put(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/update/${selectedShop}`, widgetSettings);
       setHasChanges(false);
-      alert('Widget settings saved!');
+      alert('✅ Changes saved successfully!');
     } catch (err) {
-      console.error('Failed to save settings:', err);
-      alert('Error saving settings');
+      console.error(err);
+      alert('❌ Failed to save changes.');
     }
   };
 
   const handleDeleteShop = async () => {
-    if (!selectedShop) return alert("Please select a shop to delete.");
-
-    const confirmDelete = confirm(`Are you sure you want to delete the shop: ${selectedShop}?`);
+    if (!selectedShop) return alert("Please select a shop.");
+    const confirmDelete = confirm(`Delete store: ${selectedShop}?`);
     if (!confirmDelete) return;
-
     try {
       await axios.delete(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/delete/${selectedShop}`);
-      const updatedShops = shops.filter((shop) => shop.shop !== selectedShop);
+      const updatedShops = shops.filter(shop => shop.shop !== selectedShop);
       setShops(updatedShops);
-
-      if (updatedShops.length > 0) {
-        setSelectedShop(updatedShops[0].shop);
-      } else {
-        setSelectedShop('');
-        setError('No shops remaining.');
-      }
-
-      alert(`Shop ${selectedShop} deleted successfully.`);
+      setSelectedShop(updatedShops[0]?.shop || '');
+      if (!updatedShops.length) setError('No stores remaining.');
+      alert(`🗑️ Deleted ${selectedShop}`);
     } catch (err) {
-      console.error('Failed to delete shop:', err);
+      console.error(err);
       alert('Error deleting shop.');
     }
   };
 
   const sectionClass = (section) =>
-    `w-full text-left px-4 py-2 rounded transition ${selectedSection === section
-      ? 'bg-emerald-600 text-white'
-      : 'bg-gray-50 hover:bg-emerald-100 text-gray-800'
+    `w-full text-left px-4 py-2 rounded-md transition-all font-medium ${
+      selectedSection === section
+        ? 'bg-emerald-600 text-white shadow'
+        : 'bg-gray-100 hover:bg-emerald-100 text-gray-700'
     }`;
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-100 font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md border-r border-gray-200 p-6 space-y-6">
+      <aside className="w-72 bg-white border-r border-gray-200 shadow-md p-6 flex flex-col gap-6">
         <div>
-          <label htmlFor="shopSelector" className="block text-sm font-medium text-gray-700 mb-1">
-            Select Store:
+          <label htmlFor="shopSelector" className="text-sm font-semibold text-gray-800 mb-2 block">
+            Connected Store
           </label>
           <select
             id="shopSelector"
@@ -122,27 +104,25 @@ export default function ShopifySites() {
             onChange={handleShopChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
           >
-            {shops.map((shop, index) => (
-              <option key={index} value={shop.shop}>
-                {shop.shop}
-              </option>
+            {shops.map((shop, idx) => (
+              <option key={idx} value={shop.shop}>{shop.shop}</option>
             ))}
           </select>
 
           <button
             onClick={handleDeleteShop}
-            className="mt-3 w-full bg-red-600 text-white py-2 px-3 rounded hover:bg-red-700 transition"
+            className="mt-4 w-full text-sm bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-md transition"
           >
-            🗑️ Delete Shop
+            🗑️ Delete Store
           </button>
         </div>
 
         <nav className="space-y-2">
           <button onClick={() => setSelectedSection('widget')} className={sectionClass('widget')}>
-            🧩 Widget
+            🧩 Widget Settings
           </button>
           <button onClick={() => setSelectedSection('automatedMsg')} className={sectionClass('automatedMsg')}>
-            🧪 Automated Messages
+            💬 Automated Messages
           </button>
         </nav>
       </aside>
@@ -150,14 +130,16 @@ export default function ShopifySites() {
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         {loading ? (
-          <p>Loading...</p>
+          <p className="text-gray-500">Loading store settings...</p>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500 font-medium">{error}</p>
         ) : (
           <>
             {selectedSection === 'widget' && (
-              <div className="w-full bg-white shadow rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">Widget Settings for {selectedShop}</h2>
+              <section className="bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                  Widget Settings <span className="text-sm text-gray-500">({selectedShop})</span>
+                </h2>
 
                 <WidgetPlugin
                   settings={widgetSettings}
@@ -172,25 +154,28 @@ export default function ShopifySites() {
                   <button
                     onClick={handleSave}
                     disabled={!hasChanges}
-                    className={`px-5 py-2 rounded font-semibold transition ${hasChanges
-                      ? 'bg-green-600 hover:bg-green-700 text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
+                    className={`px-6 py-2 rounded-md font-semibold transition ${
+                      hasChanges
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
                   >
-                    Save Changes
+                    💾 Save Changes
                   </button>
                 </div>
-              </div>
+              </section>
             )}
 
             {selectedSection === 'automatedMsg' && (
-              <div className="w-full bg-white shadow rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">Automated Message Settings for {selectedShop}</h2>
+              <section className="bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                  WhatsApp Automation <span className="text-sm text-gray-500">({selectedShop})</span>
+                </h2>
 
                 <AutomatedMsgSettings
                   settings={widgetSettings.automatedMsg}
                   onChange={(updatedAutomatedMsg) => {
-                    setWidgetSettings((prev) => ({ ...prev, automatedMsg: updatedAutomatedMsg }));
+                    setWidgetSettings(prev => ({ ...prev, automatedMsg: updatedAutomatedMsg }));
                     setHasChanges(true);
                   }}
                 />
@@ -199,15 +184,16 @@ export default function ShopifySites() {
                   <button
                     onClick={handleSave}
                     disabled={!hasChanges}
-                    className={`px-5 py-2 rounded font-semibold transition ${hasChanges
-                      ? 'bg-green-600 hover:bg-green-700 text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
+                    className={`px-6 py-2 rounded-md font-semibold transition ${
+                      hasChanges
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
                   >
-                    Save Changes
+                    💾 Save Changes
                   </button>
                 </div>
-              </div>
+              </section>
             )}
           </>
         )}
