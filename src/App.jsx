@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import ShopifyPlugin from "./pages/ShopifyPlugin";
 import ShopifySites from "./pages/ShopifySite";
 import WidgetPlugin from "./pages/WidgetPlugin";
+import WhatsAppShop from "./pages/whatsAppShop";
 
 function App() {
   return (
@@ -38,7 +39,9 @@ function App() {
         element={<ProtectedRoute><ShopifySites /></ProtectedRoute>
         }
       />
+     <Route path="/shop/:id" element={<WhatsAppShop />} />
     </Routes>
+
   );
 }
 
