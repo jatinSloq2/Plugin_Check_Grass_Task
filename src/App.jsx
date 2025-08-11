@@ -9,6 +9,7 @@ import WidgetPlugin from "./pages/WidgetPlugin";
 import WhatsAppShop from "./pages/whatsAppShop";
 import WooShopIntegration from "./pages/WooCommerceAddForm";
 import WooNotificationSettings from "./pages/WooNotificationSettings";
+import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         }
       />
      <Route path="/shop/:id" element={<WhatsAppShop />} />
+     <Route path="/linkgenerator" element={<WhatsAppLinkGenerator />} />
     </Routes>
 
   );
