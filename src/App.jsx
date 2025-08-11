@@ -7,6 +7,8 @@ import ShopifyPlugin from "./pages/ShopifyPlugin";
 import ShopifySites from "./pages/ShopifySite";
 import WidgetPlugin from "./pages/WidgetPlugin";
 import WhatsAppShop from "./pages/whatsAppShop";
+import WooShopIntegration from "./pages/WooCommerceAddForm";
+import WooNotificationSettings from "./pages/WooNotificationSettings";
 
 function App() {
   return (
@@ -37,6 +39,16 @@ function App() {
       <Route
         path="/shopify-site"
         element={<ProtectedRoute><ShopifySites /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/woo-plugin"
+        element={<ProtectedRoute><WooShopIntegration /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/woo-settings"
+        element={<ProtectedRoute><WooNotificationSettings /></ProtectedRoute>
         }
       />
      <Route path="/shop/:id" element={<WhatsAppShop />} />
