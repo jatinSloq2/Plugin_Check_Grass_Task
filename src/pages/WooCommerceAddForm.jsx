@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
-const WooShopIntegration = ({ onShopAdded }) => {
+const WooShopIntegration = () => {
+    const {user} = useAuth();
     const [formData, setFormData] = useState({
+
         shopName: '',
         shopUrl: '',
         consumerKey: '',
@@ -20,9 +23,11 @@ const WooShopIntegration = ({ onShopAdded }) => {
         setLoading(true);
         setError(null);
         try {
-            //   const token = localStorage.getItem('token'); 
-            const res = await axios.post('http://localhost:3000/api/woo/shop/add', formData);
-            onShopAdded(res.data);
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/add`, { userId : `${user.id}`,...formData});
+            if (res.data) {
+                alert('Shop added successfully!');
+            }
             setFormData({ shopName: '', shopUrl: '', consumerKey: '', consumerSecret: '' });
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add shop');
