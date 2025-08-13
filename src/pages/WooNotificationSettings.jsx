@@ -6,36 +6,31 @@ const WooNotificationSettings = () => {
   const { user } = useAuth();
   const [shops, setShops] = useState([]);
   const [selectedShopId, setSelectedShopId] = useState('');
-  const [settings, setSettings] = useState({
-    orderCreated: false,
-    orderFulfilled: false,
-    orderCanceled: false,
-    afterOrderFulfilled: false,
-    cartAbandoned: false,
-  });
+  const [settings, setSettings] = useState({});
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const api_token = user?.api_token;
 
-  // Fetch all shops for the user
+  // Fetch all shops
   useEffect(() => {
+    if (!user?.id) return;
     const fetchShops = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/api/woo/shop/user/${user.id}`);
+        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/user/${user.id}`);
         setShops(res.data);
-      } catch (err) {
+      } catch {
         setError('Failed to load shops');
       }
     };
-    if (user?.id) {
-      fetchShops();
-    }
+    fetchShops();
   }, [user]);
 
   // Fetch settings when a shop is selected
   useEffect(() => {
+    if (!selectedShopId) return;
     const fetchSettings = async () => {
-      if (!selectedShopId) return;
       try {
         const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/${selectedShopId}/settings`);
         setSettings(res.data);
@@ -46,9 +41,53 @@ const WooNotificationSettings = () => {
     fetchSettings();
   }, [selectedShopId]);
 
-  const handleToggle = (e) => {
-    const { name, checked } = e.target;
-    setSettings((prev) => ({ ...prev, [name]: checked }));
+  useEffect(() => {
+    if (!api_token) return;
+
+    const fetchTemplates = async () => {
+      try {
+        const res = await fetch(`https://aigreentick.com/api/v1/wa-templates?type=get&page=1`, {
+          headers: {
+            'Authorization': `Bearer ${api_token}`,
+          },
+        });
+        const json = await res.json();
+        const templatesArray = json?.data?.data || [];
+        const formattedTemplates = templatesArray.map(t => ({
+          id: t.id,
+          name: t.name,
+        }));
+        setTemplates(formattedTemplates);
+      } catch (err) {
+        console.error('Failed to fetch templates:', err);
+      }
+    };
+
+    fetchTemplates();
+  }, [api_token]);
+
+  const handleToggle = (key) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: { ...prev[key], enabled: !prev[key]?.enabled },
+    }));
+  };
+
+  const handleTemplateChange = (key, value) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: { ...prev[key], templateId: value },
+    }));
+  };
+
+  const handleDelayChange = (field, value) => {
+    setSettings(prev => ({
+      ...prev,
+      afterOrderFulfilled: {
+        ...prev.afterOrderFulfilled,
+        delay: { ...prev.afterOrderFulfilled.delay, [field]: value },
+      },
+    }));
   };
 
   const handleSave = async () => {
@@ -85,7 +124,7 @@ const WooNotificationSettings = () => {
           className="w-full border rounded p-2"
         >
           <option value="">-- Choose a shop --</option>
-          {shops.map((shop) => (
+          {shops.map(shop => (
             <option key={shop._id} value={shop._id}>
               {shop.shopName}
             </option>
@@ -93,21 +132,64 @@ const WooNotificationSettings = () => {
         </select>
       </div>
 
-      {/* Show settings only if shop is selected */}
-      {selectedShopId && (
-        <>
-          {Object.keys(settings).map((key) => (
-            <label key={key} className="flex items-center mb-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name={key}
-                checked={settings[key]}
-                onChange={handleToggle}
-                className="mr-3 w-5 h-5"
-              />
-              <span className="capitalize">{key}</span>
-            </label>
-          ))}
+      {/* Notification settings */}
+      {selectedShopId && Object.keys(settings).length > 0 && (
+        <div className="space-y-4">
+          {Object.keys(settings)
+            .filter(key => key !== '_id')
+            .map(key => {
+              const setting = settings[key];
+              console.log("settings", settings,
+                "setting", setting
+              )
+              if (templates.length === 0) return null;
+              return (
+                <div key={key} className="border p-3 rounded">
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      checked={setting?.enabled || false}
+                      onChange={() => handleToggle(key)}
+                      className="mr-3 w-5 h-5"
+                    />
+                    <span className="font-medium capitalize">{key}</span>
+                  </div>
+
+                  {/* Template select */}
+                  {templates.length > 0 && (
+                    <select
+                      value={setting?.templateId || ''}
+                      onChange={(e) => handleTemplateChange(key, e.target.value)}
+                      className="w-full border rounded p-2 mb-2"
+                      disabled={!setting?.enabled}
+                    >
+                      <option value="">-- Select Template --</option>
+                      {templates.map((t) => (
+                        <option key={t.id} value={String(t.id)}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {/* Delay input for afterOrderFulfilled */}
+                  {key === 'afterOrderFulfilled' && (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        min={1}
+                        value={setting?.delay?.value || 10}
+                        onChange={(e) => handleDelayChange('value', Number(e.target.value))}
+                        disabled={!setting?.enabled}
+                        className="border rounded p-1 w-16"
+                      />
+                      <span>{setting?.delay?.unit || 'days'}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
           <button
             onClick={handleSave}
             disabled={loading}
@@ -115,7 +197,7 @@ const WooNotificationSettings = () => {
           >
             {loading ? 'Saving...' : 'Save Settings'}
           </button>
-        </>
+        </div>
       )}
 
       {error && <p className="mt-2 text-red-600">{error}</p>}
@@ -125,3 +207,7 @@ const WooNotificationSettings = () => {
 };
 
 export default WooNotificationSettings;
+
+
+
+
