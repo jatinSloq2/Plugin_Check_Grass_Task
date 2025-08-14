@@ -10,6 +10,7 @@ import WhatsAppShop from "./pages/whatsAppShop";
 import WooShopIntegration from "./pages/WooCommerceAddForm";
 import WooNotificationSettings from "./pages/WooNotificationSettings";
 import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
+import CalendlyIntegration from "./pages/CalendlyIntegration";
 
 function App() {
   return (
@@ -50,6 +51,11 @@ function App() {
       <Route
         path="/woo-settings"
         element={<ProtectedRoute><WooNotificationSettings /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/calendly"
+        element={<ProtectedRoute><CalendlyIntegration /></ProtectedRoute>
         }
       />
      <Route path="/shop/:id" element={<WhatsAppShop />} />
