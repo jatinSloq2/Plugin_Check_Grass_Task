@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const UNITS = ["minutes", "hours", "days"];
@@ -7,10 +7,50 @@ const UNITS = ["minutes", "hours", "days"];
 const CalendlyIntegration = () => {
     const { user } = useAuth();
     const [connected, setConnected] = useState(false);
-    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [options, setOptions] = useState({ enabled: false, times: [] });
-    const [newTime, setNewTime] = useState({ value: "", unit: "minutes" });
+    const [templates, setTemplates] = useState([]);
+    const api_token = user.api_token
+    const [options, setOptions] = useState({
+        reminders: {
+            enabled: false,
+            templateId: "",
+            campaignName: "reminders",
+            "24h": false,
+            "1h": false,
+            "10m": false,
+        },
+        events: {
+            enabled: false,
+            templateId: "",
+            campaignName: "events",
+            booked: false,
+            rescheduled: false,
+            cancelled: false,
+        },
+    });
+
+    useEffect(() => {
+        if (!api_token) return;
+
+        const fetchTemplates = async () => {
+            try {
+                const res = await fetch(`https://aigreentick.com/api/v1/wa-templates?type=get&page=1`, {
+                    headers: { Authorization: `Bearer ${api_token}` },
+                });
+                const json = await res.json();
+                const templatesArray = json?.data?.data || [];
+                const formattedTemplates = templatesArray.map((t) => ({
+                    id: t.id,
+                    name: t.name,
+                }));
+                setTemplates(formattedTemplates);
+            } catch (err) {
+                console.error("Failed to fetch templates:", err);
+            }
+        };
+
+        fetchTemplates();
+    }, [api_token]);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -24,15 +64,27 @@ const CalendlyIntegration = () => {
                 if (connectionRes.data.connected) {
                     setConnected(true);
 
-                    const eventsRes = await axios.get(
-                        `${import.meta.env.VITE_SERVER_URL}/calendly/events?userId=${user.id}`
-                    );
-                    setEvents(eventsRes.data || []);
-
                     const optionsRes = await axios.get(
                         `${import.meta.env.VITE_SERVER_URL}/calendly/options?userId=${user.id}`
                     );
-                    setOptions(optionsRes.data || { enabled: false, times: [] });
+                    setOptions(optionsRes.data || {
+                        reminders: {
+                            enabled: false,
+                            templateId: "",
+                            campaignName: "reminders",
+                            "24h": false,
+                            "1h": false,
+                            "10m": false,
+                        },
+                        events: {
+                            enabled: false,
+                            templateId: "",
+                            campaignName: "events",
+                            booked: false,
+                            rescheduled: false,
+                            cancelled: false,
+                        },
+                    });
                 } else {
                     setConnected(false);
                 }
@@ -51,10 +103,16 @@ const CalendlyIntegration = () => {
         window.location.href = `${import.meta.env.VITE_SERVER_URL}/calendly/connect?userId=${user.id}`;
     };
 
-    const handleOptionChange = async (e) => {
-        const { name, checked } = e.target;
-        const updatedOptions = { ...options, [name]: checked };
+    const handleOptionChange = async (section, field, value) => {
+        const updatedOptions = {
+            ...options,
+            [section]: {
+                ...options[section],
+                [field]: value,
+            },
+        };
         setOptions(updatedOptions);
+
         try {
             await axios.post(
                 `${import.meta.env.VITE_SERVER_URL}/calendly/options?userId=${user.id}`,
@@ -65,41 +123,32 @@ const CalendlyIntegration = () => {
         }
     };
 
-    const handleAddTime = async () => {
-        if (!newTime.value || isNaN(newTime.value) || newTime.value <= 0) return;
-
-        const updatedTimes = [
-            ...options.times,
-            { value: Number(newTime.value), unit: newTime.unit }
-        ];
-        const updatedOptions = { ...options, times: updatedTimes };
-        setOptions(updatedOptions);
-        setNewTime({ value: "", unit: "minutes" });
-
+    const handleDisconnect = async () => {
         try {
-            await axios.post(
-                `${import.meta.env.VITE_SERVER_URL}/calendly/options?userId=${user.id}`,
-                updatedOptions
+            await axios.get(
+                `${import.meta.env.VITE_SERVER_URL}/calendly/disconnect?userId=${user.id}`
             );
+            setConnected(false);
+            setOptions({
+                reminders: {
+                    enabled: false,
+                    templateId: "",
+                    campaignName: "reminders",
+                    "24h": false,
+                    "1h": false,
+                    "10m": false,
+                },
+                events: {
+                    enabled: false,
+                    templateId: "",
+                    campaignName: "events",
+                    booked: false,
+                    rescheduled: false,
+                    cancelled: false,
+                },
+            });
         } catch (err) {
-            console.error("Failed to add new reminder time", err);
-        }
-    };
-
-    const handleRemoveTime = async (timeToRemove) => {
-        const updatedTimes = options.times.filter(
-            t => !(t.value === timeToRemove.value && t.unit === timeToRemove.unit)
-        );
-        const updatedOptions = { ...options, times: updatedTimes };
-        setOptions(updatedOptions);
-
-        try {
-            await axios.post(
-                `${import.meta.env.VITE_SERVER_URL}/calendly/options?userId=${user.id}`,
-                updatedOptions
-            );
-        } catch (err) {
-            console.error("Failed to remove reminder time", err);
+            console.error("Failed to disconnect Calendly:", err);
         }
     };
 
@@ -131,96 +180,115 @@ const CalendlyIntegration = () => {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200 flex items-center justify-between">
                         <p className="text-green-700 font-semibold flex items-center">
                             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clipRule="evenodd"
+                                />
                             </svg>
                             Calendly Connected Successfully!
                         </p>
-                    </div>
-
-                    {/* Upcoming Events */}
-                    <div className="bg-white p-6 rounded-lg border">
-                        <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
-                        {events.length > 0 ? (
-                            <ul className="space-y-2">
-                                {events.map((event, index) => (
-                                    <li key={event.uri || index} className="p-3 bg-gray-50 rounded border">
-                                        <div className="font-medium">{event.name || "Untitled Event"}</div>
-                                        <div className="text-sm text-gray-600">
-                                            {event.start_time ? new Date(event.start_time).toLocaleString() : "No date available"}
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-gray-500">No upcoming events found.</p>
-                        )}
+                        <button
+                            onClick={handleDisconnect}
+                            className="ml-4 bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 transition"
+                        >
+                            Disconnect
+                        </button>
                     </div>
 
                     {/* Reminder Settings */}
                     <div className="bg-white p-6 rounded-lg border">
                         <h2 className="text-xl font-semibold mb-4">Reminder Settings</h2>
 
-                        <div className="space-y-4">
-                            <label className="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    name="enabled"
-                                    checked={options.enabled}
-                                    onChange={handleOptionChange}
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                                />
-                                <span className="text-sm font-medium">Enable Email Reminders</span>
-                            </label>
+                        <label className="flex items-center gap-2 mb-2">
+                            <input
+                                type="checkbox"
+                                checked={options.reminders.enabled}
+                                onChange={(e) => handleOptionChange("reminders", "enabled", e.target.checked)}
+                            />
+                            Enable Reminders
+                        </label>
 
-                            {options.enabled && (
-                                <div className="ml-7 space-y-3">
-                                    <p className="text-sm text-gray-600 mb-2">Send reminders:</p>
+                        {options.reminders.enabled && (
+                            <div className="ml-5 space-y-3">
+                                <label className="block">
+                                    <span className="text-sm text-gray-600">Select Template:</span>
+                                    <select
+                                        value={options.reminders.templateId}
+                                        onChange={(e) => handleOptionChange("reminders", "templateId", e.target.value)}
+                                        className="border rounded px-2 py-1 w-full"
+                                    >
+                                        <option value="">-- Select Template --</option>
+                                        {templates.map((tpl) => (
+                                            <option key={tpl.id} value={tpl.id}>
+                                                {tpl.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
 
-                                    {options.times.map((time, index) => (
-                                        <div key={`${time.value}-${time.unit}`} className="flex items-center gap-2">
-                                            <span className="text-sm">{`${time.value} ${time.unit} before`}</span>
-                                            <button
-                                                onClick={() => handleRemoveTime(time)}
-                                                className="text-red-500 hover:text-red-700 text-sm"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
+                                <div className="flex flex-col gap-2">
+                                    {["24h", "1h", "10m"].map((field) => (
+                                        <label key={field} className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={options.reminders[field]}
+                                                onChange={(e) => handleOptionChange("reminders", field, e.target.checked)}
+                                            />
+                                            {field} before
+                                        </label>
                                     ))}
-
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            placeholder="Value"
-                                            value={newTime.value}
-                                            onChange={(e) => setNewTime({ ...newTime, value: e.target.value })}
-                                            className="w-20 border rounded px-2 py-1"
-                                        />
-                                        <select
-                                            value={newTime.unit}
-                                            onChange={(e) => setNewTime({ ...newTime, unit: e.target.value })}
-                                            className="border rounded px-2 py-1"
-                                        >
-                                            {UNITS.map((unit) => (
-                                                <option key={unit} value={unit}>
-                                                    {unit}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            onClick={handleAddTime}
-                                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                                        >
-                                            Add
-                                        </button>
-                                    </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Event Notifications */}
+                    <div className="bg-white p-6 rounded-lg border">
+                        <h2 className="text-xl font-semibold mb-4">Event Notifications</h2>
+
+                        <label className="flex items-center gap-2 mb-2">
+                            <input
+                                type="checkbox"
+                                checked={options.events.enabled}
+                                onChange={(e) => handleOptionChange("events", "enabled", e.target.checked)}
+                            />
+                            Enable Event Notifications
+                        </label>
+
+                        {options.events.enabled && (
+                            <div className="ml-5 space-y-3">
+                                <label className="block">
+                                    <span className="text-sm text-gray-600">Select Template:</span>
+                                    <select
+                                        value={options.events.templateId}
+                                        onChange={(e) => handleOptionChange("events", "templateId", e.target.value)}
+                                        className="border rounded px-2 py-1 w-full"
+                                    >
+                                        <option value="">-- Select Template --</option>
+                                        {templates.map((tpl) => (
+                                            <option key={tpl.id} value={tpl.id}>
+                                                {tpl.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                {["booked", "rescheduled", "cancelled"].map((field) => (
+                                    <label key={field} className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={options.events[field]}
+                                            onChange={(e) => handleOptionChange("events", field, e.target.checked)}
+                                        />
+                                        On {field}
+                                    </label>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
