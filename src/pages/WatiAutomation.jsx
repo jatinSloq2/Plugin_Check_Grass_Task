@@ -41,6 +41,10 @@ const AutomationFlowBuilder = () => {
     const canvasRef = useRef(null);
     const [nodeCounter, setNodeCounter] = useState(1);
 
+    // Fixed dimensions for consistent sizing
+    const NODE_WIDTH = 280;
+    const NODE_HEIGHT = 140;
+
     // Node types configuration with WATI-style design
     const nodeTypes = [
         {
@@ -73,23 +77,38 @@ const AutomationFlowBuilder = () => {
         }
     ];
 
-    // Mouse position tracking
+    // Mouse position tracking with throttling for performance
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const mousePosRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
+        let animationFrameId;
+        
         const handleMouseMove = (e) => {
             if (canvasRef.current) {
                 const rect = canvasRef.current.getBoundingClientRect();
-                setMousePos({
+                mousePosRef.current = {
                     x: e.clientX - rect.left,
                     y: e.clientY - rect.top
-                });
+                };
+                
+                // Only update state during connection mode for performance
+                if (connectionMode) {
+                    animationFrameId = requestAnimationFrame(() => {
+                        setMousePos(mousePosRef.current);
+                    });
+                }
             }
         };
 
         document.addEventListener('mousemove', handleMouseMove);
-        return () => document.removeEventListener('mousemove', handleMouseMove);
-    }, []);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
+    }, [connectionMode]);
 
     // Canvas controls
     const handleZoomIn = () => setZoom(prev => Math.min(prev * 1.2, 3));
@@ -113,8 +132,8 @@ const AutomationFlowBuilder = () => {
         nodes.forEach(node => {
             minX = Math.min(minX, node.position.x);
             minY = Math.min(minY, node.position.y);
-            maxX = Math.max(maxX, node.position.x + 280);
-            maxY = Math.max(maxY, node.position.y + 140);
+            maxX = Math.max(maxX, node.position.x + NODE_WIDTH);
+            maxY = Math.max(maxY, node.position.y + NODE_HEIGHT);
         });
 
         const contentWidth = maxX - minX;
@@ -138,9 +157,10 @@ const AutomationFlowBuilder = () => {
         });
     };
 
-    // Canvas panning
+    // Canvas panning with improved performance
     const handleCanvasMouseDown = (e) => {
         if (e.button !== 0 || connectionMode || e.target.closest('.flow-node')) return;
+        e.preventDefault();
         setIsPanning(true);
         setPanStart({
             x: e.clientX - panOffset.x,
@@ -148,45 +168,59 @@ const AutomationFlowBuilder = () => {
         });
     };
 
-    const handleCanvasMouseMove = (e) => {
+    const handleCanvasMouseMove = useCallback((e) => {
         if (isPanning && !draggingNode) {
             setPanOffset({
                 x: e.clientX - panStart.x,
                 y: e.clientY - panStart.y
             });
         }
-    };
+    }, [isPanning, draggingNode, panStart]);
 
-    const handleCanvasMouseUp = () => {
+    const handleCanvasMouseUp = useCallback(() => {
         setIsPanning(false);
-    };
+    }, []);
 
-    // Wheel zoom
-    const handleWheel = (e) => {
+    // Optimized wheel zoom
+    const handleWheel = useCallback((e) => {
         e.preventDefault();
+        
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newZoom = Math.max(0.25, Math.min(3, zoom * delta));
+
+        if (newZoom === zoom) return; // Skip if zoom doesn't change
 
         const rect = canvasRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
         const scaleFactor = newZoom / zoom;
-        setPanOffset({
-            x: mouseX - (mouseX - panOffset.x) * scaleFactor,
-            y: mouseY - (mouseY - panOffset.y) * scaleFactor
-        });
+        setPanOffset(prev => ({
+            x: mouseX - (mouseX - prev.x) * scaleFactor,
+            y: mouseY - (mouseY - prev.y) * scaleFactor
+        }));
 
         setZoom(newZoom);
-    };
+    }, [zoom]);
 
+    // Attach global event listeners with cleanup
     useEffect(() => {
+        document.addEventListener('mousemove', handleCanvasMouseMove);
+        document.addEventListener('mouseup', handleCanvasMouseUp);
+        
         const canvas = canvasRef.current;
         if (canvas) {
             canvas.addEventListener('wheel', handleWheel, { passive: false });
-            return () => canvas.removeEventListener('wheel', handleWheel);
         }
-    }, [zoom, panOffset]);
+        
+        return () => {
+            document.removeEventListener('mousemove', handleCanvasMouseMove);
+            document.removeEventListener('mouseup', handleCanvasMouseUp);
+            if (canvas) {
+                canvas.removeEventListener('wheel', handleWheel);
+            }
+        };
+    }, [handleCanvasMouseMove, handleCanvasMouseUp, handleWheel]);
 
     const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -242,8 +276,8 @@ const AutomationFlowBuilder = () => {
 
         const rect = canvasRef.current.getBoundingClientRect();
         const position = {
-            x: (e.clientX - rect.left - panOffset.x) / zoom - 140,
-            y: (e.clientY - rect.top - panOffset.y) / zoom - 70
+            x: (e.clientX - rect.left - panOffset.x) / zoom - NODE_WIDTH / 2,
+            y: (e.clientY - rect.top - panOffset.y) / zoom - NODE_HEIGHT / 2
         };
 
         createNode(draggedNode.type, position);
@@ -255,9 +289,8 @@ const AutomationFlowBuilder = () => {
         e.preventDefault();
     }, []);
 
-    // Node dragging with proper event handling
+    // Optimized node dragging
     const handleNodeMouseDown = (e, node) => {
-        // Prevent dragging if clicking on menu or buttons
         if (e.target.closest('.node-menu') || 
             e.target.closest('.node-menu-trigger') ||
             e.target.closest('.connection-point') ||
@@ -266,7 +299,7 @@ const AutomationFlowBuilder = () => {
         }
 
         e.stopPropagation();
-        e.preventDefault(); // Prevent text selection
+        e.preventDefault();
         
         const rect = canvasRef.current.getBoundingClientRect();
         setDraggingNode(node.id);
@@ -276,18 +309,22 @@ const AutomationFlowBuilder = () => {
         });
     };
 
+    // Optimized mouse move with requestAnimationFrame
     const handleMouseMove = useCallback((e) => {
         if (draggingNode && canvasRef.current) {
             e.preventDefault();
-            const rect = canvasRef.current.getBoundingClientRect();
-            const newX = (e.clientX - rect.left - panOffset.x) / zoom - dragOffset.x;
-            const newY = (e.clientY - rect.top - panOffset.y) / zoom - dragOffset.y;
+            
+            requestAnimationFrame(() => {
+                const rect = canvasRef.current.getBoundingClientRect();
+                const newX = (e.clientX - rect.left - panOffset.x) / zoom - dragOffset.x;
+                const newY = (e.clientY - rect.top - panOffset.y) / zoom - dragOffset.y;
 
-            setNodes(prev => prev.map(node =>
-                node.id === draggingNode
-                    ? { ...node, position: { x: newX, y: newY } }
-                    : node
-            ));
+                setNodes(prev => prev.map(node =>
+                    node.id === draggingNode
+                        ? { ...node, position: { x: newX, y: newY } }
+                        : node
+                ));
+            });
         }
     }, [draggingNode, dragOffset, zoom, panOffset]);
 
@@ -298,7 +335,7 @@ const AutomationFlowBuilder = () => {
 
     useEffect(() => {
         if (draggingNode) {
-            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mousemove', handleMouseMove, { passive: false });
             document.addEventListener('mouseup', handleMouseUp);
             return () => {
                 document.removeEventListener('mousemove', handleMouseMove);
@@ -354,28 +391,25 @@ const AutomationFlowBuilder = () => {
         setConnectionMode(false);
     };
 
-    // Get connection points
+    // Get connection points with fixed positioning
     const getConnectionPoint = (node, isSource = false, optionId = null) => {
-        const nodeWidth = 280;
-        const nodeHeight = 140;
-
         if (isSource) {
             return {
-                x: (node.position.x + nodeWidth / 2) * zoom + panOffset.x,
-                y: (node.position.y + nodeHeight) * zoom + panOffset.y
+                x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
+                y: (node.position.y + NODE_HEIGHT) * zoom + panOffset.y
             };
         } else {
             return {
-                x: (node.position.x + nodeWidth / 2) * zoom + panOffset.x,
-                y: (node.position.y) * zoom + panOffset.y
+                x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
+                y: node.position.y * zoom + panOffset.y
             };
         }
     };
 
     // Node menu functions
     const handleNodeMenuClick = (e, nodeId, action) => {
-        e.stopPropagation();
-        e.preventDefault();
+        e && e.stopPropagation();
+        e && e.preventDefault();
 
         const node = nodes.find(n => n.id === nodeId);
 
@@ -435,7 +469,7 @@ const AutomationFlowBuilder = () => {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    // Enhanced Node Component
+    // Enhanced Node Component with fixed sizing
     const NodeComponent = ({ node }) => {
         const nodeType = nodeTypes.find(t => t.type === node.type);
         const Icon = nodeType?.icon || MessageSquare;
@@ -458,18 +492,20 @@ const AutomationFlowBuilder = () => {
             setNodeMenuOpen(nodeMenuOpen === node.id ? null : node.id);
         };
 
+        // Fixed transform with proper scaling
+        const transform = `translate(${node.position.x * zoom + panOffset.x}px, ${node.position.y * zoom + panOffset.y}px) scale(${zoom})`;
+
         return (
             <div
-                className={`flow-node absolute bg-white rounded-xl shadow-lg border-2 cursor-pointer transition-all duration-200 ${
+                className={`flow-node absolute origin-top-left bg-white rounded-xl shadow-lg border-2 cursor-pointer transition-all duration-200 ${
                     isSelected ? 'border-blue-400 shadow-2xl ring-4 ring-blue-100' : 'border-gray-200 hover:border-gray-300'
                 } ${connectionMode ? 'hover:border-green-400' : ''} ${
-                    isBeingDragged ? 'shadow-2xl scale-105 z-50 rotate-1' : ''
+                    isBeingDragged ? 'shadow-2xl z-50' : ''
                 }`}
                 style={{
-                    left: node.position.x * zoom + panOffset.x,
-                    top: node.position.y * zoom + panOffset.y,
-                    width: 280 * zoom,
-                    minHeight: 140 * zoom,
+                    transform,
+                    width: NODE_WIDTH,
+                    minHeight: NODE_HEIGHT,
                     zIndex: isSelected ? 20 : isBeingDragged ? 50 : 1,
                     userSelect: 'none'
                 }}
@@ -602,9 +638,14 @@ const AutomationFlowBuilder = () => {
                     )}
                 </div>
 
-                {/* Input Connection Point */}
+                {/* Input Connection Point - Fixed position relative to zoom */}
                 <div
-                    className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-white border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 transition-colors shadow-sm connection-point"
+                    className="absolute w-6 h-6 bg-white border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 transition-colors shadow-sm connection-point"
+                    style={{
+                        top: -12 / zoom,
+                        left: NODE_WIDTH / 2 - 12 / zoom,
+                        transform: `scale(${1 / zoom})`
+                    }}
                     onClick={(e) => {
                         e.stopPropagation();
                         if (connectionMode && connectionStart) {
@@ -617,7 +658,7 @@ const AutomationFlowBuilder = () => {
         );
     };
 
-    // Enhanced connection rendering
+    // Optimized connection rendering with memoization
     const renderConnections = () => {
         const allConnections = [...connections];
 
@@ -638,30 +679,32 @@ const AutomationFlowBuilder = () => {
             <svg className="absolute inset-0 pointer-events-none w-full h-full" style={{ zIndex: 0 }}>
                 <defs>
                     <filter id="glow">
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
                         <feMerge> 
                             <feMergeNode in="coloredBlur"/>
                             <feMergeNode in="SourceGraphic"/>
                         </feMerge>
                     </filter>
-                    {allConnections.map(conn => (
-                        <marker
-                            key={`arrow-${conn.id}`}
-                            id={`arrow-${conn.id}`}
-                            markerWidth="14"
-                            markerHeight="10"
-                            refX="13"
-                            refY="5"
-                            orient="auto"
-                            markerUnits="strokeWidth"
-                        >
-                            <path
-                                d="M0,0 L0,10 L14,5 z"
-                                fill={conn.isTemp ? "#10b981" : "#3b82f6"}
-                                stroke="none"
-                            />
-                        </marker>
-                    ))}
+                    <marker
+                        id="arrowhead"
+                        markerWidth="10"
+                        markerHeight="7"
+                        refX="10"
+                        refY="3.5"
+                        orient="auto"
+                    >
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+                    </marker>
+                    <marker
+                        id="arrowhead-temp"
+                        markerWidth="10"
+                        markerHeight="7"
+                        refX="10"
+                        refY="3.5"
+                        orient="auto"
+                    >
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+                    </marker>
                 </defs>
 
                 {allConnections.map(conn => {
@@ -682,7 +725,7 @@ const AutomationFlowBuilder = () => {
                     const dx = targetPoint.x - sourcePoint.x;
                     const dy = targetPoint.y - sourcePoint.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    const curveStrength = Math.min(distance * 0.4, 120);
+                    const curveStrength = Math.min(distance * 0.3, 80);
 
                     const controlPoint1 = {
                         x: sourcePoint.x,
@@ -698,25 +741,15 @@ const AutomationFlowBuilder = () => {
 
                     return (
                         <g key={conn.id}>
-                            {/* Glow effect */}
+                            {/* Shadow/glow effect */}
                             <path
                                 d={pathData}
                                 stroke={conn.isTemp ? "#10b981" : "#3b82f6"}
-                                strokeWidth="8"
+                                strokeWidth="6"
                                 fill="none"
-                                opacity="0.2"
-                                filter="url(#glow)"
-                            />
-                            {/* Main path */}
-                            <path
-                                d={pathData}
-                                stroke={conn.isTemp ? "#10b981" : "#3b82f6"}
-                                strokeWidth={conn.isTemp ? "3" : "3"}
-                                fill="none"
-                                markerEnd={`url(#arrow-${conn.id})`}
+                                markerEnd={conn.isTemp ? "url(#arrowhead-temp)" : "url(#arrowhead)"}
                                 strokeDasharray={conn.isTemp ? "8,4" : "none"}
                                 opacity={conn.isTemp ? "0.8" : "1"}
-                                className="transition-all duration-200"
                             />
                         </g>
                     );
@@ -1160,17 +1193,17 @@ const AutomationFlowBuilder = () => {
                         backgroundImage: `radial-gradient(circle, #9ca3af 1px, transparent 1px)`,
                         backgroundSize: `${25 * zoom}px ${25 * zoom}px`,
                         backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
-                        cursor: isPanning ? 'grabbing' : draggingNode ? 'grabbing' : 'grab'
+                        cursor: isPanning ? 'grabbing' : draggingNode ? 'grabbing' : connectionMode ? 'crosshair' : 'grab'
                     }}
                     onDrop={handleCanvasDrop}
                     onDragOver={handleDragOver}
                     onMouseDown={handleCanvasMouseDown}
-                    onMouseMove={handleCanvasMouseMove}
-                    onMouseUp={handleCanvasMouseUp}
                     onClick={() => {
-                        setSelectedNode(null);
-                        setEditingNode(null);
-                        setNodeMenuOpen(null);
+                        if (!connectionMode) {
+                            setSelectedNode(null);
+                            setEditingNode(null);
+                            setNodeMenuOpen(null);
+                        }
                     }}
                 >
                     {renderConnections()}
