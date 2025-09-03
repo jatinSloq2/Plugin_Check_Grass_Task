@@ -11,6 +11,8 @@ import WooShopIntegration from "./pages/WooCommerceAddForm";
 import WooNotificationSettings from "./pages/WooNotificationSettings";
 import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
 import CalendlyIntegration from "./pages/CalendlyIntegration";
+import PayuIntegration from "./pages/payUintegrations";
+import WatiAutomations from "./pages/WatiAutomation";
 
 function App() {
   return (
@@ -58,8 +60,14 @@ function App() {
         element={<ProtectedRoute><CalendlyIntegration /></ProtectedRoute>
         }
       />
+      <Route
+        path="/payu"
+        element={<ProtectedRoute><PayuIntegration /></ProtectedRoute>
+        }
+      />
      <Route path="/shop/:id" element={<WhatsAppShop />} />
      <Route path="/linkgenerator" element={<WhatsAppLinkGenerator />} />
+     <Route path="/automations" element={<WatiAutomations />} />
     </Routes>
 
   );
