@@ -27,7 +27,6 @@ const AutomationFlowBuilder = () => {
     const [selectedNode, setSelectedNode] = useState(null);
     const [draggedNode, setDraggedNode] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [connectionMode, setConnectionMode] = useState(false);
     const [connectionStart, setConnectionStart] = useState(null);
     const [flowName, setFlowName] = useState('New WhatsApp Flow');
     const [zoom, setZoom] = useState(1);
@@ -40,6 +39,8 @@ const AutomationFlowBuilder = () => {
     const [editingNode, setEditingNode] = useState(null);
     const canvasRef = useRef(null);
     const [nodeCounter, setNodeCounter] = useState(1);
+    const [tempConnection, setTempConnection] = useState(null);
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     // Fixed dimensions for consistent sizing
     const NODE_WIDTH = 280;
@@ -78,7 +79,6 @@ const AutomationFlowBuilder = () => {
     ];
 
     // Mouse position tracking with throttling for performance
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const mousePosRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -92,10 +92,23 @@ const AutomationFlowBuilder = () => {
                     y: e.clientY - rect.top
                 };
                 
-                // Only update state during connection mode for performance
-                if (connectionMode) {
+                // Update mouse position for connections
+                setMousePos(mousePosRef.current);
+                
+                // Update temp connection when dragging
+                if (connectionStart) {
                     animationFrameId = requestAnimationFrame(() => {
-                        setMousePos(mousePosRef.current);
+                        const sourceNode = nodes.find(n => n.id === connectionStart.nodeId);
+                        if (sourceNode) {
+                            const sourcePoint = getConnectionPoint(sourceNode, true, connectionStart.optionId);
+                            setTempConnection({
+                                sourcePoint,
+                                targetPoint: { 
+                                    x: mousePosRef.current.x, 
+                                    y: mousePosRef.current.y 
+                                }
+                            });
+                        }
                     });
                 }
             }
@@ -108,7 +121,7 @@ const AutomationFlowBuilder = () => {
                 cancelAnimationFrame(animationFrameId);
             }
         };
-    }, [connectionMode]);
+    }, [connectionStart, nodes]);
 
     // Canvas controls
     const handleZoomIn = () => setZoom(prev => Math.min(prev * 1.2, 3));
@@ -159,7 +172,7 @@ const AutomationFlowBuilder = () => {
 
     // Canvas panning with improved performance
     const handleCanvasMouseDown = (e) => {
-        if (e.button !== 0 || connectionMode || e.target.closest('.flow-node')) return;
+        if (e.button !== 0 || connectionStart || e.target.closest('.flow-node')) return;
         e.preventDefault();
         setIsPanning(true);
         setPanStart({
@@ -179,7 +192,13 @@ const AutomationFlowBuilder = () => {
 
     const handleCanvasMouseUp = useCallback(() => {
         setIsPanning(false);
-    }, []);
+        
+        // Cancel connection if not dropped on a valid target
+        if (connectionStart) {
+            setConnectionStart(null);
+            setTempConnection(null);
+        }
+    }, [connectionStart]);
 
     // Optimized wheel zoom
     const handleWheel = useCallback((e) => {
@@ -294,7 +313,7 @@ const AutomationFlowBuilder = () => {
         if (e.target.closest('.node-menu') || 
             e.target.closest('.node-menu-trigger') ||
             e.target.closest('.connection-point') ||
-            connectionMode) {
+            connectionStart) {
             return;
         }
 
@@ -344,17 +363,32 @@ const AutomationFlowBuilder = () => {
         }
     }, [draggingNode, handleMouseMove, handleMouseUp]);
 
-    // Connection handling
-    const handleNodeConnection = (nodeId, optionId = null) => {
-        if (!connectionStart) {
-            setConnectionStart({ nodeId, optionId });
-            setConnectionMode(true);
-            return;
+    // Handle connection point mouse down (start connection)
+    const handleConnectionPointMouseDown = (e, nodeId, optionId = null) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        setConnectionStart({ nodeId, optionId });
+        
+        const node = nodes.find(n => n.id === nodeId);
+        if (node) {
+            const sourcePoint = getConnectionPoint(node, true, optionId);
+            setTempConnection({
+                sourcePoint,
+                targetPoint: { x: e.clientX, y: e.clientY }
+            });
         }
+    };
 
+    // Handle connection point mouse up (end connection)
+    const handleConnectionPointMouseUp = (e, nodeId) => {
+        if (!connectionStart) return;
+        e.stopPropagation();
+        e.preventDefault();
+        
         if (connectionStart.nodeId === nodeId) {
             setConnectionStart(null);
-            setConnectionMode(false);
+            setTempConnection(null);
             return;
         }
 
@@ -388,17 +422,30 @@ const AutomationFlowBuilder = () => {
 
         setConnections(prev => [...prev, newConnection]);
         setConnectionStart(null);
-        setConnectionMode(false);
+        setTempConnection(null);
     };
 
     // Get connection points with fixed positioning
     const getConnectionPoint = (node, isSource = false, optionId = null) => {
         if (isSource) {
-            return {
-                x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
-                y: (node.position.y + NODE_HEIGHT) * zoom + panOffset.y
-            };
+            // For source connections (output)
+            if (optionId) {
+                // For option connections, position at the option's location
+                const optionIndex = node.data.options.findIndex(opt => opt.id === optionId);
+                const optionY = 60 + (optionIndex * 32) + 16; // 60 is header height, 32 is option height, 16 is half option height
+                return {
+                    x: (node.position.x + NODE_WIDTH - 20) * zoom + panOffset.x,
+                    y: (node.position.y + optionY) * zoom + panOffset.y
+                };
+            } else {
+                // For main node output
+                return {
+                    x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
+                    y: (node.position.y + NODE_HEIGHT) * zoom + panOffset.y
+                };
+            }
         } else {
+            // For target connections (input)
             return {
                 x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
                 y: node.position.y * zoom + panOffset.y
@@ -477,10 +524,6 @@ const AutomationFlowBuilder = () => {
         const isSelected = selectedNode?.id === node.id;
 
         const handleNodeClick = (e) => {
-            if (connectionMode) {
-                handleNodeConnection(node.id);
-                return;
-            }
             if (!draggingNode && !e.target.closest('.node-menu') && !e.target.closest('.node-menu-trigger')) {
                 setSelectedNode(node);
             }
@@ -499,7 +542,7 @@ const AutomationFlowBuilder = () => {
             <div
                 className={`flow-node absolute origin-top-left bg-white rounded-xl shadow-lg border-2 cursor-pointer transition-all duration-200 ${
                     isSelected ? 'border-blue-400 shadow-2xl ring-4 ring-blue-100' : 'border-gray-200 hover:border-gray-300'
-                } ${connectionMode ? 'hover:border-green-400' : ''} ${
+                } ${connectionStart ? 'hover:border-green-400' : ''} ${
                     isBeingDragged ? 'shadow-2xl z-50' : ''
                 }`}
                 style={{
@@ -572,18 +615,14 @@ const AutomationFlowBuilder = () => {
                             )}
                         </div>
 
-                        {/* Connection point */}
+                        {/* Output connection point */}
                         <button
-                            className={`connection-point w-6 h-6 rounded-full border-2 border-white transition-all ${
-                                connectionStart?.nodeId === node.id && !connectionStart.optionId 
-                                    ? 'bg-white ring-2 ring-white/50' : 'bg-white/30 hover:bg-white/50'
-                            }`}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleNodeConnection(node.id);
-                            }}
-                            title="Connect from this node"
-                        />
+                            className={`connection-point w-6 h-6 rounded-full border-2 border-white transition-all bg-white/30 hover:bg-white/50 flex items-center justify-center`}
+                            onMouseDown={(e) => handleConnectionPointMouseDown(e, node.id)}
+                            title="Drag to connect to another node"
+                        >
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </button>
                     </div>
                 </div>
 
@@ -604,10 +643,6 @@ const AutomationFlowBuilder = () => {
                                             ? 'bg-green-50 hover:bg-green-100 border border-green-200 text-green-800'
                                             : 'bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-800'
                                     }`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (connectionMode) handleNodeConnection(node.id, option.id);
-                                    }}
                                 >
                                     <span className="truncate flex-1 font-medium">{option.text}</span>
                                     <div className="flex items-center gap-2">
@@ -615,17 +650,12 @@ const AutomationFlowBuilder = () => {
                                             <ArrowRight size={12} className="opacity-60" />
                                         )}
                                         <button
-                                            className={`connection-point w-4 h-4 rounded-full border transition-all ${
-                                                connectionStart?.nodeId === node.id && connectionStart?.optionId === option.id
-                                                    ? 'bg-current border-current ring-1 ring-current/30'
-                                                    : 'bg-current/20 border-current/40 hover:bg-current/40'
-                                            }`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleNodeConnection(node.id, option.id);
-                                            }}
-                                            title="Connect from this option"
-                                        />
+                                            className={`connection-point w-4 h-4 rounded-full border transition-all bg-current/20 border-current/40 hover:bg-current/40 flex items-center justify-center`}
+                                            onMouseDown={(e) => handleConnectionPointMouseDown(e, node.id, option.id)}
+                                            title="Drag to connect from this option"
+                                        >
+                                            <div className="w-1 h-1 bg-current rounded-full"></div>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -640,51 +670,26 @@ const AutomationFlowBuilder = () => {
 
                 {/* Input Connection Point - Fixed position relative to zoom */}
                 <div
-                    className="absolute w-6 h-6 bg-white border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 transition-colors shadow-sm connection-point"
+                    className="absolute w-6 h-6 bg-white border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 transition-colors shadow-sm connection-point flex items-center justify-center"
                     style={{
-                        top: -12 / zoom,
-                        left: NODE_WIDTH / 2 - 12 / zoom,
+                        top: -12,
+                        left: NODE_WIDTH / 2 - 12,
                         transform: `scale(${1 / zoom})`
                     }}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (connectionMode && connectionStart) {
-                            handleNodeConnection(node.id);
-                        }
-                    }}
+                    onMouseUp={(e) => handleConnectionPointMouseUp(e, node.id)}
                     title="Connect to this node"
-                />
+                >
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                </div>
             </div>
         );
     };
 
     // Optimized connection rendering with memoization
     const renderConnections = () => {
-        const allConnections = [...connections];
-
-        if (connectionMode && connectionStart) {
-            const sourceNode = nodes.find(n => n.id === connectionStart.nodeId);
-            if (sourceNode) {
-                const sourcePoint = getConnectionPoint(sourceNode, true, connectionStart.optionId);
-                allConnections.push({
-                    id: 'temp-connection',
-                    isTemp: true,
-                    sourcePoint,
-                    targetPoint: { x: mousePos.x, y: mousePos.y }
-                });
-            }
-        }
-
         return (
             <svg className="absolute inset-0 pointer-events-none w-full h-full" style={{ zIndex: 0 }}>
                 <defs>
-                    <filter id="glow">
-                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                        <feMerge> 
-                            <feMergeNode in="coloredBlur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                    </filter>
                     <marker
                         id="arrowhead"
                         markerWidth="10"
@@ -693,7 +698,7 @@ const AutomationFlowBuilder = () => {
                         refY="3.5"
                         orient="auto"
                     >
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#000" />
                     </marker>
                     <marker
                         id="arrowhead-temp"
@@ -703,24 +708,18 @@ const AutomationFlowBuilder = () => {
                         refY="3.5"
                         orient="auto"
                     >
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
                     </marker>
                 </defs>
 
-                {allConnections.map(conn => {
-                    let sourcePoint, targetPoint;
+                {/* Render existing connections */}
+                {connections.map(conn => {
+                    const fromNode = nodes.find(n => n.id === conn.sourceNodeId);
+                    const toNode = nodes.find(n => n.id === conn.targetNodeId);
+                    if (!fromNode || !toNode) return null;
 
-                    if (conn.isTemp) {
-                        sourcePoint = conn.sourcePoint;
-                        targetPoint = conn.targetPoint;
-                    } else {
-                        const fromNode = nodes.find(n => n.id === conn.sourceNodeId);
-                        const toNode = nodes.find(n => n.id === conn.targetNodeId);
-                        if (!fromNode || !toNode) return null;
-
-                        sourcePoint = getConnectionPoint(fromNode, true);
-                        targetPoint = getConnectionPoint(toNode, false);
-                    }
+                    const sourcePoint = getConnectionPoint(fromNode, true, conn.sourceOptionId);
+                    const targetPoint = getConnectionPoint(toNode, false);
 
                     const dx = targetPoint.x - sourcePoint.x;
                     const dy = targetPoint.y - sourcePoint.y;
@@ -741,25 +740,46 @@ const AutomationFlowBuilder = () => {
 
                     return (
                         <g key={conn.id}>
-                            {/* Shadow/glow effect */}
                             <path
                                 d={pathData}
-                                stroke={conn.isTemp ? "#10b981" : "#3b82f6"}
-                                strokeWidth="6"
+                                stroke="#000"
+                                strokeWidth="2"
+                                strokeDasharray="5,3"
                                 fill="none"
-                                markerEnd={conn.isTemp ? "url(#arrowhead-temp)" : "url(#arrowhead)"}
-                                strokeDasharray={conn.isTemp ? "8,4" : "none"}
-                                opacity={conn.isTemp ? "0.8" : "1"}
+                                markerEnd="url(#arrowhead)"
                             />
                         </g>
                     );
                 })}
+
+                {/* Render temporary connection when dragging */}
+                {tempConnection && (
+                    <g>
+                        <path
+                            d={`M ${tempConnection.sourcePoint.x} ${tempConnection.sourcePoint.y} L ${tempConnection.targetPoint.x} ${tempConnection.targetPoint.y}`}
+                            stroke="#666"
+                            strokeWidth="2"
+                            strokeDasharray="5,3"
+                            fill="none"
+                            markerEnd="url(#arrowhead-temp)"
+                        />
+                    </g>
+                )}
             </svg>
         );
     };
 
-    // Enhanced Properties Panel
+    // Enhanced Properties Panel with local state to prevent focus loss
     const PropertiesPanel = () => {
+        const [localNodeData, setLocalNodeData] = useState(null);
+        
+        useEffect(() => {
+            if (selectedNode || editingNode) {
+                const currentNode = editingNode || selectedNode;
+                setLocalNodeData({...currentNode.data});
+            }
+        }, [selectedNode, editingNode]);
+
         if (!selectedNode && !editingNode) {
             return (
                 <div className="w-80 bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 p-6">
@@ -787,22 +807,38 @@ const AutomationFlowBuilder = () => {
             if (selectedNode) setSelectedNode(prev => ({ ...prev, data: { ...prev.data, [key]: value } }));
         };
 
+        const handleLocalChange = (key, value) => {
+            setLocalNodeData(prev => ({...prev, [key]: value}));
+        };
+
+        const handleBlur = (key) => {
+            if (localNodeData[key] !== currentNode.data[key]) {
+                updateNodeData(key, localNodeData[key]);
+            }
+        };
+
         const addOption = () => {
-            const newOption = { id: generateId(), text: `Option ${currentNode.data.options.length + 1}`, nodeResultId: '' };
-            updateNodeData('options', [...currentNode.data.options, newOption]);
+            const newOption = { id: generateId(), text: `Option ${localNodeData.options.length + 1}`, nodeResultId: '' };
+            const updatedOptions = [...localNodeData.options, newOption];
+            setLocalNodeData(prev => ({...prev, options: updatedOptions}));
+            updateNodeData('options', updatedOptions);
         };
 
         const updateOption = (optionId, key, value) => {
-            const updatedOptions = currentNode.data.options.map(opt =>
+            const updatedOptions = localNodeData.options.map(opt =>
                 opt.id === optionId ? { ...opt, [key]: value } : opt
             );
+            setLocalNodeData(prev => ({...prev, options: updatedOptions}));
             updateNodeData('options', updatedOptions);
         };
 
         const removeOption = (optionId) => {
-            const updatedOptions = currentNode.data.options.filter(opt => opt.id !== optionId);
+            const updatedOptions = localNodeData.options.filter(opt => opt.id !== optionId);
+            setLocalNodeData(prev => ({...prev, options: updatedOptions}));
             updateNodeData('options', updatedOptions);
         };
+
+        if (!localNodeData) return null;
 
         return (
             <div className="w-80 bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-y-auto">
@@ -830,8 +866,9 @@ const AutomationFlowBuilder = () => {
                         </label>
                         <input
                             type="text"
-                            value={currentNode.data.label}
-                            onChange={(e) => updateNodeData('label', e.target.value)}
+                            value={localNodeData.label}
+                            onChange={(e) => handleLocalChange('label', e.target.value)}
+                            onBlur={() => handleBlur('label')}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="Enter node name"
                         />
@@ -845,8 +882,9 @@ const AutomationFlowBuilder = () => {
                              currentNode.type === 'interactiveButtons' ? 'Button Menu Text' : 'Condition'}
                         </label>
                         <textarea
-                            value={currentNode.data.content}
-                            onChange={(e) => updateNodeData('content', e.target.value)}
+                            value={localNodeData.content}
+                            onChange={(e) => handleLocalChange('content', e.target.value)}
+                            onBlur={() => handleBlur('content')}
                             rows={4}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                             placeholder="Enter your content here..."
@@ -861,8 +899,9 @@ const AutomationFlowBuilder = () => {
                             </label>
                             <input
                                 type="text"
-                                value={currentNode.data.variable}
-                                onChange={(e) => updateNodeData('variable', e.target.value)}
+                                value={localNodeData.variable}
+                                onChange={(e) => handleLocalChange('variable', e.target.value)}
+                                onBlur={() => handleBlur('variable')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                 placeholder="e.g., user_choice"
                             />
@@ -885,14 +924,14 @@ const AutomationFlowBuilder = () => {
                             </div>
                             
                             <div className="space-y-3">
-                                {currentNode.data.options.map((option, index) => (
+                                {localNodeData.options.map((option, index) => (
                                     <div key={option.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                                         <div className="flex items-center gap-2 mb-2">
                                             <span className="text-xs font-medium text-gray-500">Option {index + 1}</span>
                                             <button
                                                 onClick={() => removeOption(option.id)}
                                                 className="p-1 hover:bg-red-100 rounded text-red-500 transition-colors"
-                                                disabled={currentNode.data.options.length <= 1}
+                                                disabled={localNodeData.options.length <= 1}
                                             >
                                                 <X size={12} />
                                             </button>
@@ -1051,27 +1090,12 @@ const AutomationFlowBuilder = () => {
 
                             <button
                                 onClick={() => {
-                                    setConnectionMode(!connectionMode);
-                                    setConnectionStart(null);
-                                }}
-                                className={`px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-all ${
-                                    connectionMode
-                                        ? 'bg-green-600 text-white shadow-lg hover:bg-green-700'
-                                        : 'bg-white text-gray-600 hover:text-gray-800 border border-gray-300 hover:border-gray-400'
-                                }`}
-                            >
-                                <Zap size={16} />
-                                {connectionMode ? 'Exit Connect' : 'Connect Nodes'}
-                            </button>
-
-                            <button
-                                onClick={() => {
                                     setNodes([]);
                                     setConnections([]);
                                     setSelectedNode(null);
                                     setEditingNode(null);
                                     setConnectionStart(null);
-                                    setConnectionMode(false);
+                                    setTempConnection(null);
                                     setNodeMenuOpen(null);
                                 }}
                                 className="px-4 py-2 bg-white text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg flex items-center gap-2 hover:border-gray-400 transition-all"
@@ -1100,16 +1124,16 @@ const AutomationFlowBuilder = () => {
                         </div>
                     </div>
 
-                    {connectionMode && (
+                    {connectionStart && (
                         <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-green-500 rounded-lg">
                                     <Zap size={16} className="text-white" />
                                 </div>
                                 <div>
-                                    <div className="font-semibold text-green-800">Connection Mode Active</div>
+                                    <div className="font-semibold text-green-800">Creating Connection</div>
                                     <div className="text-sm text-green-700">
-                                        Click connection points on nodes to link them together
+                                        Drag to a node to create a connection
                                         {connectionStart && (
                                             <span className="ml-2 font-medium">
                                                 • Connecting from: {nodes.find(n => n.id === connectionStart.nodeId)?.data.label}
@@ -1179,7 +1203,7 @@ const AutomationFlowBuilder = () => {
                                 <div>• Use mouse wheel to zoom</div>
                                 <div>• Click and drag to pan canvas</div>
                                 <div>• Click ⋮ menu for node options</div>
-                                <div>• Use Connect mode to link nodes</div>
+                                <div>• Drag connection points to link nodes</div>
                             </div>
                         </div>
                     </div>
@@ -1193,17 +1217,15 @@ const AutomationFlowBuilder = () => {
                         backgroundImage: `radial-gradient(circle, #9ca3af 1px, transparent 1px)`,
                         backgroundSize: `${25 * zoom}px ${25 * zoom}px`,
                         backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
-                        cursor: isPanning ? 'grabbing' : draggingNode ? 'grabbing' : connectionMode ? 'crosshair' : 'grab'
+                        cursor: isPanning ? 'grabbing' : draggingNode ? 'grabbing' : connectionStart ? 'crosshair' : 'grab'
                     }}
                     onDrop={handleCanvasDrop}
                     onDragOver={handleDragOver}
                     onMouseDown={handleCanvasMouseDown}
                     onClick={() => {
-                        if (!connectionMode) {
-                            setSelectedNode(null);
-                            setEditingNode(null);
-                            setNodeMenuOpen(null);
-                        }
+                        setSelectedNode(null);
+                        setEditingNode(null);
+                        setNodeMenuOpen(null);
                     }}
                 >
                     {renderConnections()}
