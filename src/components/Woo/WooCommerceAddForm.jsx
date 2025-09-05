@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Store, Globe, Key, Lock, Plus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 // Updated WooShopIntegration component with real API and callback
 const WooShopIntegration = ({ onShopAdded }) => {

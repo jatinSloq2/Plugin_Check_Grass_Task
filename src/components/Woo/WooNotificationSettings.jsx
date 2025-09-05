@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { AlertTriangle, Bell, Check, Clock, Settings, Store, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const WooNotificationSettings = ({ onAllShopsDeleted }) => {
   const { user } = useAuth();

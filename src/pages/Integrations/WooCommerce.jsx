@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 
 // Import your existing components
 import { useAuth } from '../../context/AuthContext';
-import WooShopIntegration from '../WooCommerceAddForm';
-import WooNotificationSettings from '../WooNotificationSettings';
+import WooShopIntegration from '../../components/Woo/WooCommerceAddForm';
+import WooNotificationSettings from '../../components/Woo/WooNotificationSettings';
 
 const WooCommerce = () => {
   const { user } = useAuth();

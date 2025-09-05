@@ -1,21 +1,17 @@
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import UnprotectedRoute from "./components/UnprotectedRoute";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import ShopifyPlugin from "./components/Shopify/ShopifyPlugin";
-import ShopifySites from "./components/Shopify/ShopifySite";
-import WidgetPlugin from "./pages/WidgetPlugin";
-import WhatsAppShop from "./pages/whatsAppShop";
-import WooShopIntegration from "./pages/WooCommerceAddForm";
-import WooNotificationSettings from "./pages/WooNotificationSettings";
-import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
 import CalendlyIntegration from "./pages/CalendlyIntegration";
-import PayuIntegration from "./pages/payUintegrations";
-import WatiAutomations from "./pages/WatiAutomation";
+import Home from "./pages/Home";
 import Integrations from "./pages/Integrations";
 import Shopify from "./pages/Integrations/shopify";
 import WooCommerce from "./pages/Integrations/WooCommerce";
+import Login from "./pages/Login";
+import PayuIntegration from "./pages/payUintegrations";
+import WatiAutomations from "./pages/WatiAutomation";
+import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
+import WhatsAppShop from "./pages/whatsAppShop";
+import WidgetPlugin from "./pages/WidgetPlugin";
 
 function App() {
   return (
@@ -34,16 +30,6 @@ function App() {
       <Route
         path="/widget-plugin"
         element={<ProtectedRoute><WidgetPlugin /></ProtectedRoute>
-        }
-      />
-      <Route
-        path="/woo-plugin"
-        element={<ProtectedRoute><WooShopIntegration /></ProtectedRoute>
-        }
-      />
-      <Route
-        path="/woo-settings"
-        element={<ProtectedRoute><WooNotificationSettings /></ProtectedRoute>
         }
       />
       <Route
