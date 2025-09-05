@@ -13,6 +13,8 @@ import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
 import CalendlyIntegration from "./pages/CalendlyIntegration";
 import PayuIntegration from "./pages/payUintegrations";
 import WatiAutomations from "./pages/WatiAutomation";
+import Integrations from "./pages/Integrations";
+import Shopify from "./pages/Integrations/shopify";
 
 function App() {
   return (
@@ -31,18 +33,6 @@ function App() {
       <Route
         path="/widget-plugin"
         element={<ProtectedRoute><WidgetPlugin /></ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/shopify-plugin"
-        element={<ProtectedRoute><ShopifyPlugin /></ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/shopify-site"
-        element={<ProtectedRoute><ShopifySites /></ProtectedRoute>
         }
       />
       <Route
@@ -65,9 +55,19 @@ function App() {
         element={<ProtectedRoute><PayuIntegration /></ProtectedRoute>
         }
       />
-     <Route path="/shop/:id" element={<WhatsAppShop />} />
-     <Route path="/linkgenerator" element={<WhatsAppLinkGenerator />} />
-     <Route path="/automations" element={<WatiAutomations />} />
+      <Route
+        path="/integrations"
+        element={<ProtectedRoute><Integrations /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/integrations/shopify"
+        element={<ProtectedRoute><Shopify /></ProtectedRoute>
+        }
+      />
+      <Route path="/shop/:id" element={<WhatsAppShop />} />
+      <Route path="/linkgenerator" element={<WhatsAppLinkGenerator />} />
+      <Route path="/automations" element={<WatiAutomations />} />
     </Routes>
 
   );

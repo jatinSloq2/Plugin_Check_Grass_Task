@@ -3,13 +3,13 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import WidgetPlugin from '../components/Shopify/WidgetPlugin';
 import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
-import { 
-  Trash2, 
-  Puzzle, 
-  MessageCircle, 
-  Save, 
-  Store, 
-  Settings, 
+import {
+  Trash2,
+  Puzzle,
+  MessageCircle,
+  Save,
+  Store,
+  Settings,
   ChevronDown,
   Loader2,
   AlertCircle,
@@ -88,7 +88,7 @@ export default function ShopifySites() {
     if (!selectedShop) return alert("Please select a shop.");
     const confirmDelete = confirm(`Delete store: ${selectedShop}?`);
     if (!confirmDelete) return;
-    
+
     setDeleting(true);
     try {
       await axios.delete(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/delete/${selectedShop}`);
@@ -106,10 +106,9 @@ export default function ShopifySites() {
   };
 
   const sectionClass = (section) =>
-    `group w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
-      selectedSection === section
-        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200'
-        : 'bg-white hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 text-gray-700 hover:text-emerald-700 border border-gray-200 hover:border-emerald-200'
+    `group w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl transition-all duration-200 font-medium ${selectedSection === section
+      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200'
+      : 'bg-white hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 text-gray-700 hover:text-emerald-700 border border-gray-200 hover:border-emerald-200'
     }`;
 
   return (
@@ -180,48 +179,44 @@ export default function ShopifySites() {
                 <Sparkles className="w-4 h-4" />
                 Configuration
               </h3>
-              
-              <button 
-                onClick={() => setSelectedSection('widget')} 
+
+              <button
+                onClick={() => setSelectedSection('widget')}
                 className={sectionClass('widget')}
               >
-                <div className={`p-2 rounded-lg ${
-                  selectedSection === 'widget' 
-                    ? 'bg-white/20' 
-                    : 'bg-emerald-100 group-hover:bg-emerald-200'
-                }`}>
+                <div className={`p-2 rounded-lg ${selectedSection === 'widget'
+                  ? 'bg-white/20'
+                  : 'bg-emerald-100 group-hover:bg-emerald-200'
+                  }`}>
                   <Puzzle className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="font-semibold">Widget Settings</div>
-                  <div className={`text-xs ${
-                    selectedSection === 'widget' 
-                      ? 'text-emerald-100' 
-                      : 'text-gray-500'
-                  }`}>
+                  <div className={`text-xs ${selectedSection === 'widget'
+                    ? 'text-emerald-100'
+                    : 'text-gray-500'
+                    }`}>
                     Customize chat widget
                   </div>
                 </div>
               </button>
-              
-              <button 
-                onClick={() => setSelectedSection('automatedMsg')} 
+
+              <button
+                onClick={() => setSelectedSection('automatedMsg')}
                 className={sectionClass('automatedMsg')}
               >
-                <div className={`p-2 rounded-lg ${
-                  selectedSection === 'automatedMsg' 
-                    ? 'bg-white/20' 
-                    : 'bg-emerald-100 group-hover:bg-emerald-200'
-                }`}>
+                <div className={`p-2 rounded-lg ${selectedSection === 'automatedMsg'
+                  ? 'bg-white/20'
+                  : 'bg-emerald-100 group-hover:bg-emerald-200'
+                  }`}>
                   <MessageCircle className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="font-semibold">Auto Messages</div>
-                  <div className={`text-xs ${
-                    selectedSection === 'automatedMsg' 
-                      ? 'text-emerald-100' 
-                      : 'text-gray-500'
-                  }`}>
+                  <div className={`text-xs ${selectedSection === 'automatedMsg'
+                    ? 'text-emerald-100'
+                    : 'text-gray-500'
+                    }`}>
                     WhatsApp automation
                   </div>
                 </div>
@@ -282,11 +277,10 @@ export default function ShopifySites() {
                       <button
                         onClick={handleSave}
                         disabled={!hasChanges || saving}
-                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold transition-all duration-200 ${
-                          hasChanges && !saving
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        }`}
+                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold transition-all duration-200 ${hasChanges && !saving
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
+                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          }`}
                       >
                         {saving ? (
                           <>
@@ -343,11 +337,10 @@ export default function ShopifySites() {
                       <button
                         onClick={handleSave}
                         disabled={!hasChanges || saving}
-                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold transition-all duration-200 ${
-                          hasChanges && !saving
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        }`}
+                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold transition-all duration-200 ${hasChanges && !saving
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
+                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          }`}
                       >
                         {saving ? (
                           <>
