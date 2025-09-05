@@ -1,10 +1,10 @@
+import { Bell, Calendar, CheckCircle, Clock, ExternalLink, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { Calendar, CheckCircle, Clock, Bell, Settings, AlertCircle, ExternalLink } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const UNITS = ["minutes", "hours", "days"];
 
-const CalendlyIntegration = () => {
+const Calendly = () => {
     const { user } = useAuth();
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -418,4 +418,4 @@ const CalendlyIntegration = () => {
     );
 };
 
-export default CalendlyIntegration;
+export default Calendly;

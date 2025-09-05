@@ -1,16 +1,15 @@
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import UnprotectedRoute from "./components/UnprotectedRoute";
-import CalendlyIntegration from "./pages/CalendlyIntegration";
 import Home from "./pages/Home";
 import Integrations from "./pages/Integrations";
+import Calendly from "./pages/Integrations/Calendly";
 import Shopify from "./pages/Integrations/shopify";
+import WhatsAppLinkGenerator from "./pages/Integrations/WhatsAppLinkGenerator";
 import WooCommerce from "./pages/Integrations/WooCommerce";
 import Login from "./pages/Login";
 import PayuIntegration from "./pages/payUintegrations";
 import WatiAutomations from "./pages/WatiAutomation";
-import WhatsAppLinkGenerator from "./pages/WhatsAppLinkGenerator";
-import WhatsAppShop from "./pages/whatsAppShop";
 import WidgetPlugin from "./pages/WidgetPlugin";
 
 function App() {
@@ -33,11 +32,6 @@ function App() {
         }
       />
       <Route
-        path="/calendly"
-        element={<ProtectedRoute><CalendlyIntegration /></ProtectedRoute>
-        }
-      />
-      <Route
         path="/payu"
         element={<ProtectedRoute><PayuIntegration /></ProtectedRoute>
         }
@@ -57,8 +51,21 @@ function App() {
         element={<ProtectedRoute><WooCommerce /></ProtectedRoute>
         }
       />
-      <Route path="/shop/:id" element={<WhatsAppShop />} />
-      <Route path="/linkgenerator" element={<WhatsAppLinkGenerator />} />
+      <Route
+        path="/integrations/calendly"
+        element={<ProtectedRoute><Calendly /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/integrations/linkgenerator"
+        element={<ProtectedRoute><WhatsAppLinkGenerator /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/integrations/widgetgenerator"
+        element={<ProtectedRoute><WidgetPlugin /></ProtectedRoute>
+        }
+      />
       <Route path="/automations" element={<WatiAutomations />} />
     </Routes>
 

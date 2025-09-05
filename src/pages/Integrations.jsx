@@ -112,7 +112,6 @@ const Integrations = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
             <div className="mx-auto p-8">
-                {/* Header Section with WhatsApp green theme */}
                 <div className="mb-12">
                     <h1 className="text-xl font-bold text-black bg-clip-text mb-2">
                         Connect AI Green Tick to your favorite services
