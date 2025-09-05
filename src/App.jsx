@@ -3,8 +3,8 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import UnprotectedRoute from "./components/UnprotectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import ShopifyPlugin from "./pages/ShopifyPlugin";
-import ShopifySites from "./pages/ShopifySite";
+import ShopifyPlugin from "./components/Shopify/ShopifyPlugin";
+import ShopifySites from "./components/Shopify/ShopifySite";
 import WidgetPlugin from "./pages/WidgetPlugin";
 import WhatsAppShop from "./pages/whatsAppShop";
 import WooShopIntegration from "./pages/WooCommerceAddForm";
@@ -15,6 +15,7 @@ import PayuIntegration from "./pages/payUintegrations";
 import WatiAutomations from "./pages/WatiAutomation";
 import Integrations from "./pages/Integrations";
 import Shopify from "./pages/Integrations/shopify";
+import WooCommerce from "./pages/Integrations/WooCommerce";
 
 function App() {
   return (
@@ -63,6 +64,11 @@ function App() {
       <Route
         path="/integrations/shopify"
         element={<ProtectedRoute><Shopify /></ProtectedRoute>
+        }
+      />
+      <Route
+        path="/integrations/woocommerce"
+        element={<ProtectedRoute><WooCommerce /></ProtectedRoute>
         }
       />
       <Route path="/shop/:id" element={<WhatsAppShop />} />

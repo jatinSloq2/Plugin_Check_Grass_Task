@@ -9,8 +9,8 @@ import {
   Store
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
-import WidgetPlugin from '../components/Shopify/WidgetPlugin';
+import AutomatedMsgSettings from './AutomatedMsgSettings';
+import WidgetPlugin from './WidgetPlugin';
 
 export default function ShopifySites({ shops, refreshShops }) {
   const [selectedShop, setSelectedShop] = useState('');
@@ -22,6 +22,8 @@ export default function ShopifySites({ shops, refreshShops }) {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+  const [newShop, setNewShop] = useState('');
 
   useEffect(() => {
     if (shops.length > 0) {
@@ -91,7 +93,28 @@ export default function ShopifySites({ shops, refreshShops }) {
     }
   };
 
+  const handleAddStore = () => {
+    const formattedShop = newShop.trim()
+      .replace(/^https?:\/\//, '')
+      .replace(/\/+$/, '')
+      .toLowerCase();
 
+    if (!formattedShop || !formattedShop.endsWith('.myshopify.com')) {
+      alert('Please enter a valid Shopify store (e.g. your-store.myshopify.com)');
+      return;
+    }
+
+    if (!user?.id) {
+      alert('User not logged in. Please log in to continue.');
+      return;
+    }
+
+    console.log(
+      `Adding new store: ${import.meta.env.VITE_SERVER_URL || 'YOUR_SERVER_URL'}/auth/shopify?shop=${formattedShop}&userId=${user.id}`
+    );
+
+    window.location.href = `${import.meta.env.VITE_SERVER_URL}/auth/shopify?shop=${formattedShop}&userId=${user.id}`;
+  };
 
 
   return (
@@ -108,7 +131,7 @@ export default function ShopifySites({ shops, refreshShops }) {
             className="w-full border rounded-lg px-3 py-2 mb-6 text-sm"
           >
             {shops.map((shop, idx) => {
-              const shopName = shop.shop.split(".")[0]; // Get only the name before the dot
+              const shopName = shop.shop.split(".")[0];
               return (
                 <option key={idx} value={shop.shop}>
                   {shopName}
@@ -128,7 +151,52 @@ export default function ShopifySites({ shops, refreshShops }) {
           {isManageModalOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-                <h2 className="text-lg font-bold mb-4">Manage Stores</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-bold">Manage Stores</h2>
+                  <button
+                    onClick={() => setIsManageModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Add Store Button */}
+                <div className="mb-4">
+                  <button
+                    onClick={() => setIsAddFormVisible(!isAddFormVisible)}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 w-full"
+                  >
+                    {isAddFormVisible ? 'Cancel' : 'Add New Store'}
+                  </button>
+                </div>
+
+                {/* Add Store Form - Similar to ShopifyPlugin */}
+                {isAddFormVisible && (
+                  <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                    <h3 className="text-md font-semibold mb-3 text-gray-900">Add New Shopify Store</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Enter your Shopify domain to connect your store
+                    </p>
+                    <div className="flex w-full shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                      <input
+                        type="text"
+                        value={newShop}
+                        onChange={(e) => setNewShop(e.target.value)}
+                        placeholder="example.myshopify.com"
+                        className="flex-grow px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none rounded-l-lg"
+                      />
+                      <button
+                        onClick={handleAddStore}
+                        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 transition-all duration-200 rounded-r-lg"
+                      >
+                        Install
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Existing Stores List */}
                 {shops.length > 0 ? (
                   <ul className="space-y-3">
                     {shops.map((shop, idx) => {
@@ -148,12 +216,13 @@ export default function ShopifySites({ shops, refreshShops }) {
                     })}
                   </ul>
                 ) : (
-                  <p>No stores connected.</p>
+                  <p className="text-gray-500 text-center py-4">
+                    {isAddFormVisible ? '' : 'No stores connected. Click "Add New Store" to get started.'}
+                  </p>
                 )}
               </div>
             </div>
           )}
-
           {/* Menu */}
           <nav className="space-y-1 text-sm">
             <button

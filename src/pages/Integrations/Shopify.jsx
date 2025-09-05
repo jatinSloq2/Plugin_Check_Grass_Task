@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import ShopifySite from '../ShopifySite';
-import ShopifyPlugin from '../ShopifyPlugin';
+import { useCallback, useEffect, useState } from 'react';
+import ShopifyPlugin from '../../components/Shopify/ShopifyPlugin';
+import ShopifySite from '../../components/Shopify/ShopifySite';
 import { useAuth } from '../../context/AuthContext';
 
 const Shopify = () => {
@@ -16,15 +16,12 @@ const Shopify = () => {
       setLoading(true);
       const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/${userId}`);
       setShops(data);
-      
-      // If no shops are returned, ensure we set an empty array
       if (!data || !Array.isArray(data) || data.length === 0) {
         setShops([]);
       }
     } catch (err) {
       console.error('Error fetching shops:', err);
       setError(err.message);
-      // Set empty array on error to show plugin component
       setShops([]);
     } finally {
       setLoading(false);

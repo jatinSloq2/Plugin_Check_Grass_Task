@@ -3,7 +3,7 @@ import { AlertTriangle, Bell, Check, Clock, Settings, Store, Trash2, X } from 'l
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const WooNotificationSettings = () => {
+const WooNotificationSettings = ({ onAllShopsDeleted }) => {
   const { user } = useAuth();
   const [shops, setShops] = useState([]);
   const [selectedShopId, setSelectedShopId] = useState('');
@@ -34,12 +34,21 @@ const WooNotificationSettings = () => {
       try {
         const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/user/${user.id}`);
         setShops(data);
+        
+        // If no shops are found, notify parent component
+        if (data.length === 0 && onAllShopsDeleted) {
+          onAllShopsDeleted();
+        }
       } catch {
         setError('Failed to load shops');
+        // If fetch fails, assume no shops and notify parent
+        if (onAllShopsDeleted) {
+          onAllShopsDeleted();
+        }
       }
     };
     fetchShops();
-  }, [user]);
+  }, [user, onAllShopsDeleted]);
 
   // Fetch settings when a shop is selected
   useEffect(() => {
@@ -156,10 +165,20 @@ const WooNotificationSettings = () => {
         setSuccessMsg(
           `Shop "${data.shopName}" successfully disconnected. ${data.webhooks.deleted}/${data.webhooks.total} webhooks removed.`
         );
-        setShops(prev => prev.filter(shop => shop._id !== selectedShopId));
+        
+        // Update local shops state
+        const updatedShops = shops.filter(shop => shop._id !== selectedShopId);
+        setShops(updatedShops);
         setSelectedShopId('');
         setSettings({});
         setShowDeleteConfirm(false);
+
+        // If no shops remain, notify parent component after a short delay
+        if (updatedShops.length === 0 && onAllShopsDeleted) {
+          setTimeout(() => {
+            onAllShopsDeleted();
+          }, 2000); // Give time to show success message
+        }
       } else {
         setError(data.message || 'Failed to disconnect shop');
       }
@@ -194,6 +213,11 @@ const WooNotificationSettings = () => {
 
   const selectedShop = shops.find(shop => shop._id === selectedShopId);
   console.log("selectedShop", selectedShop)
+
+  // If no shops exist, don't render the component (parent will handle this)
+  if (shops.length === 0) {
+    return null;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
@@ -439,14 +463,6 @@ const WooNotificationSettings = () => {
         <div className="text-center py-8">
           <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">No notification settings found for this shop.</p>
-        </div>
-      )}
-
-      {/* No shops state */}
-      {shops.length === 0 && (
-        <div className="text-center py-8">
-          <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">No WooCommerce shops connected yet.</p>
         </div>
       )}
 

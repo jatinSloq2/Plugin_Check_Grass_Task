@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Store, Globe, Key, Lock, Plus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import axios from 'axios';
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
 
-const WooShopIntegration = () => {
+// Updated WooShopIntegration component with real API and callback
+const WooShopIntegration = ({ onShopAdded }) => {
     const { user } = useAuth();
     const [formData, setFormData] = useState({
         shopName: '',
@@ -17,7 +17,6 @@ const WooShopIntegration = () => {
 
     const handleChange = e => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-        // Clear error when user starts typing
         if (error) setError(null);
         if (success) setSuccess(false);
     };
@@ -29,20 +28,36 @@ const WooShopIntegration = () => {
         setSuccess(false);
 
         try {
-            // Simulated API call - replace with your actual implementation
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/add`, {
-                userId: `${user.id}`,
-                ...formData
+            const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                    ...formData
+                })
             });
-            setSuccess(true);
-            setFormData({ shopName: '', shopUrl: '', consumerKey: '', consumerSecret: '' });
 
-            // Auto-hide success message after 3 seconds
-            setTimeout(() => setSuccess(false), 3000);
+            const data = await response.json();
+
+            // Check if the response status is 201 (Created)
+            if (response.status === 201) {
+                setSuccess(true);
+                setFormData({ shopName: '', shopUrl: '', consumerKey: '', consumerSecret: '' });
+
+                // Show success message for 2 seconds then notify parent
+                setTimeout(() => {
+                    if (onShopAdded) {
+                        onShopAdded(data);
+                    }
+                }, 2000);
+            } else {
+                throw new Error(data.message || 'Failed to add shop');
+            }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to add shop. Please try again.');
+            console.error('Error adding shop:', err);
+            setError(err.message || 'Failed to add shop. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -77,7 +92,7 @@ const WooShopIntegration = () => {
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+                <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
                     <div className="space-y-6">
                         {/* Shop Name Field */}
                         <div className="space-y-2">
@@ -166,7 +181,7 @@ const WooShopIntegration = () => {
 
                     {/* Submit Button */}
                     <button
-                        type="submit"
+                        onClick={handleSubmit}
                         disabled={loading}
                         className="w-full mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
@@ -182,7 +197,7 @@ const WooShopIntegration = () => {
                             </>
                         )}
                     </button>
-                </form>
+                </div>
 
                 {/* Help Text */}
                 <div className="mt-6 text-center">
