@@ -40,7 +40,6 @@ const AutomationFlowBuilder = () => {
     const canvasRef = useRef(null);
     const [nodeCounter, setNodeCounter] = useState(1);
     const [tempConnection, setTempConnection] = useState(null);
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     // Fixed dimensions for consistent sizing
     const NODE_WIDTH = 280;
@@ -79,6 +78,7 @@ const AutomationFlowBuilder = () => {
     ];
 
     // Mouse position tracking with throttling for performance
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const mousePosRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -92,22 +92,21 @@ const AutomationFlowBuilder = () => {
                     y: e.clientY - rect.top
                 };
                 
-                // Update mouse position for connections
-                setMousePos(mousePosRef.current);
-                
-                // Update temp connection when dragging
+                // Only update state during connection mode for performance
                 if (connectionStart) {
                     animationFrameId = requestAnimationFrame(() => {
-                        const sourceNode = nodes.find(n => n.id === connectionStart.nodeId);
-                        if (sourceNode) {
-                            const sourcePoint = getConnectionPoint(sourceNode, true, connectionStart.optionId);
-                            setTempConnection({
-                                sourcePoint,
-                                targetPoint: { 
-                                    x: mousePosRef.current.x, 
-                                    y: mousePosRef.current.y 
-                                }
-                            });
+                        setMousePos(mousePosRef.current);
+                        
+                        // Update temp connection when dragging
+                        if (connectionStart) {
+                            const sourceNode = nodes.find(n => n.id === connectionStart.nodeId);
+                            if (sourceNode) {
+                                const sourcePoint = getConnectionPoint(sourceNode, true, connectionStart.optionId);
+                                setTempConnection({
+                                    sourcePoint,
+                                    targetPoint: { x: mousePosRef.current.x, y: mousePosRef.current.y }
+                                });
+                            }
                         }
                     });
                 }
@@ -428,24 +427,11 @@ const AutomationFlowBuilder = () => {
     // Get connection points with fixed positioning
     const getConnectionPoint = (node, isSource = false, optionId = null) => {
         if (isSource) {
-            // For source connections (output)
-            if (optionId) {
-                // For option connections, position at the option's location
-                const optionIndex = node.data.options.findIndex(opt => opt.id === optionId);
-                const optionY = 60 + (optionIndex * 32) + 16; // 60 is header height, 32 is option height, 16 is half option height
-                return {
-                    x: (node.position.x + NODE_WIDTH - 20) * zoom + panOffset.x,
-                    y: (node.position.y + optionY) * zoom + panOffset.y
-                };
-            } else {
-                // For main node output
-                return {
-                    x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
-                    y: (node.position.y + NODE_HEIGHT) * zoom + panOffset.y
-                };
-            }
+            return {
+                x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
+                y: (node.position.y + NODE_HEIGHT) * zoom + panOffset.y
+            };
         } else {
-            // For target connections (input)
             return {
                 x: (node.position.x + NODE_WIDTH / 2) * zoom + panOffset.x,
                 y: node.position.y * zoom + panOffset.y
@@ -672,8 +658,8 @@ const AutomationFlowBuilder = () => {
                 <div
                     className="absolute w-6 h-6 bg-white border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 transition-colors shadow-sm connection-point flex items-center justify-center"
                     style={{
-                        top: -12,
-                        left: NODE_WIDTH / 2 - 12,
+                        top: -12 / zoom,
+                        left: NODE_WIDTH / 2 - 12 / zoom,
                         transform: `scale(${1 / zoom})`
                     }}
                     onMouseUp={(e) => handleConnectionPointMouseUp(e, node.id)}
@@ -718,7 +704,7 @@ const AutomationFlowBuilder = () => {
                     const toNode = nodes.find(n => n.id === conn.targetNodeId);
                     if (!fromNode || !toNode) return null;
 
-                    const sourcePoint = getConnectionPoint(fromNode, true, conn.sourceOptionId);
+                    const sourcePoint = getConnectionPoint(fromNode, true);
                     const targetPoint = getConnectionPoint(toNode, false);
 
                     const dx = targetPoint.x - sourcePoint.x;
