@@ -1,57 +1,41 @@
-import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
-import WidgetPlugin from '../components/Shopify/WidgetPlugin';
-import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
 import {
-  Trash2,
-  Puzzle,
-  MessageCircle,
-  Save,
-  Store,
-  Settings,
-  ChevronDown,
-  Loader2,
   AlertCircle,
   CheckCircle,
-  Sparkles
+  Loader2,
+  MessageCircle,
+  Puzzle,
+  Save,
+  Store
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import AutomatedMsgSettings from '../components/Shopify/AutomatedMsgSettings';
+import WidgetPlugin from '../components/Shopify/WidgetPlugin';
 
-export default function ShopifySites() {
-  const { user } = useAuth();
-  const [shops, setShops] = useState([]);
+export default function ShopifySites({ shops, refreshShops }) {
   const [selectedShop, setSelectedShop] = useState('');
   const [selectedSection, setSelectedSection] = useState('widget');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [hasChanges, setHasChanges] = useState(false);
   const [widgetSettings, setWidgetSettings] = useState({});
+  const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const userId = user?.id;
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) return;
-    const fetchShops = async () => {
-      try {
-        const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/${userId}`);
-        setShops(data);
-        if (data.length > 0) setSelectedShop(data[0].shop);
-        else setError('No connected stores found.');
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load stores.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchShops();
-  }, [userId]);
+    if (shops.length > 0) {
+      setSelectedShop(shops[0].shop);
+    } else {
+      setSelectedShop("");
+    }
+  }, [shops]);
 
   useEffect(() => {
     if (!selectedShop) return;
     const fetchSettings = async () => {
       try {
+        setLoading(true);
         const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/single/${selectedShop}`);
         setWidgetSettings({
           chatSettings: data.chatSettings || {},
@@ -63,6 +47,8 @@ export default function ShopifySites() {
       } catch (err) {
         console.error(err);
         setError('Could not load store settings.');
+      } finally {
+        setLoading(false);
       }
     };
     fetchSettings();
@@ -84,145 +70,114 @@ export default function ShopifySites() {
     }
   };
 
-  const handleDeleteShop = async () => {
-    if (!selectedShop) return alert("Please select a shop.");
-    const confirmDelete = confirm(`Delete store: ${selectedShop}?`);
-    if (!confirmDelete) return;
+  const handleDeleteShop = async (shopName) => {
+    if (!confirm(`Delete store: ${shopName}?`)) return;
 
     setDeleting(true);
     try {
-      await axios.delete(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/delete/${selectedShop}`);
-      const updatedShops = shops.filter(shop => shop.shop !== selectedShop);
-      setShops(updatedShops);
-      setSelectedShop(updatedShops[0]?.shop || '');
-      if (!updatedShops.length) setError('No stores remaining.');
-      alert(`Deleted ${selectedShop}`);
+      await axios.delete(`${import.meta.env.VITE_SERVER_URL}/shop-tokens/delete/${shopName}`);
+      alert(`Deleted ${shopName}`);
+      setIsManageModalOpen(false);
+      await refreshShops();
+      if (selectedShop === shopName) {
+        setSelectedShop('');
+      }
+
     } catch (err) {
       console.error(err);
-      alert('Error deleting shop.');
+      alert("Error deleting shop.");
     } finally {
       setDeleting(false);
     }
   };
 
-  const sectionClass = (section) =>
-    `group w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl transition-all duration-200 font-medium ${selectedSection === section
-      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200'
-      : 'bg-white hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 text-gray-700 hover:text-emerald-700 border border-gray-200 hover:border-emerald-200'
-    }`;
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="flex">
         {/* Enhanced Sidebar */}
-        <aside className="w-80 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-xl p-6 flex flex-col gap-8 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-10 left-10 w-20 h-20 bg-emerald-500 rounded-full blur-xl"></div>
-            <div className="absolute bottom-10 right-10 w-16 h-16 bg-teal-500 rounded-full blur-xl"></div>
-          </div>
+        <aside className="w-64 min-h-screen border-r bg-white flex flex-col p-4 text-gray-700">
+          <h2 className="text-sm font-semibold mb-2">Shopify</h2>
 
-          <div className="relative z-10">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
-                <Store className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">Store Manager</h1>
-                <p className="text-sm text-gray-500">Configure your integrations</p>
-              </div>
-            </div>
+          {/* Store Selector */}
+          <select
+            value={selectedShop}
+            onChange={handleShopChange}
+            className="w-full border rounded-lg px-3 py-2 mb-6 text-sm"
+          >
+            {shops.map((shop, idx) => {
+              const shopName = shop.shop.split(".")[0]; // Get only the name before the dot
+              return (
+                <option key={idx} value={shop.shop}>
+                  {shopName}
+                </option>
+              );
+            })}
+          </select>
 
-            {/* Store Selector */}
-            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200/50">
-              <label htmlFor="shopSelector" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                <Settings className="w-4 h-4" />
-                Connected Store
-              </label>
-              <div className="relative">
-                <select
-                  id="shopSelector"
-                  value={selectedShop}
-                  onChange={handleShopChange}
-                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition-all duration-200 appearance-none cursor-pointer text-gray-800 font-medium"
-                >
-                  {shops.map((shop, idx) => (
-                    <option key={idx} value={shop.shop}>{shop.shop}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
-
-              <button
-                onClick={handleDeleteShop}
-                disabled={deleting}
-                className="mt-4 w-full text-sm bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none disabled:cursor-not-allowed"
-              >
-                {deleting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Deleting...
-                  </>
+          {/* Delete Store Button */}
+          <button
+            onClick={() => setIsManageModalOpen(true)}
+            className="mb-6 text-sm bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg flex items-center justify-center gap-2"
+          >
+            <Store className="w-4 h-4" />
+            Manage Stores
+          </button>
+          {isManageModalOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
+                <h2 className="text-lg font-bold mb-4">Manage Stores</h2>
+                {shops.length > 0 ? (
+                  <ul className="space-y-3">
+                    {shops.map((shop, idx) => {
+                      const shopName = shop.shop.split(".")[0];
+                      return (
+                        <li key={idx} className="flex justify-between items-center border rounded-lg p-3">
+                          <span>{shopName}</span>
+                          <button
+                            onClick={() => handleDeleteShop(shop.shop)}
+                            disabled={deleting}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm"
+                          >
+                            {deleting ? "Deleting..." : "Delete"}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 ) : (
-                  <>
-                    <Trash2 className="w-4 h-4" />
-                    Delete Store
-                  </>
+                  <p>No stores connected.</p>
                 )}
-              </button>
+              </div>
             </div>
+          )}
 
-            {/* Navigation */}
-            <nav className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Configuration
-              </h3>
+          {/* Menu */}
+          <nav className="space-y-1 text-sm">
+            <button
+              onClick={() => setSelectedSection("widget")}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left ${selectedSection === "widget"
+                ? "bg-emerald-50 text-emerald-700 font-medium"
+                : "hover:bg-gray-100"
+                }`}
+            >
+              <Puzzle className="w-4 h-4" />
+              Widget Settings
+            </button>
 
-              <button
-                onClick={() => setSelectedSection('widget')}
-                className={sectionClass('widget')}
-              >
-                <div className={`p-2 rounded-lg ${selectedSection === 'widget'
-                  ? 'bg-white/20'
-                  : 'bg-emerald-100 group-hover:bg-emerald-200'
-                  }`}>
-                  <Puzzle className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-semibold">Widget Settings</div>
-                  <div className={`text-xs ${selectedSection === 'widget'
-                    ? 'text-emerald-100'
-                    : 'text-gray-500'
-                    }`}>
-                    Customize chat widget
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setSelectedSection('automatedMsg')}
-                className={sectionClass('automatedMsg')}
-              >
-                <div className={`p-2 rounded-lg ${selectedSection === 'automatedMsg'
-                  ? 'bg-white/20'
-                  : 'bg-emerald-100 group-hover:bg-emerald-200'
-                  }`}>
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-semibold">Auto Messages</div>
-                  <div className={`text-xs ${selectedSection === 'automatedMsg'
-                    ? 'text-emerald-100'
-                    : 'text-gray-500'
-                    }`}>
-                    WhatsApp automation
-                  </div>
-                </div>
-              </button>
-            </nav>
-          </div>
+            <button
+              onClick={() => setSelectedSection("automatedMsg")}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left ${selectedSection === "automatedMsg"
+                ? "bg-emerald-50 text-emerald-700 font-medium"
+                : "hover:bg-gray-100"
+                }`}
+            >
+              <MessageCircle className="w-4 h-4" />
+              Automated Message
+            </button>
+          </nav>
         </aside>
 
         {/* Enhanced Main Content */}
