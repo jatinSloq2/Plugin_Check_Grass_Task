@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AlertTriangle, Bell, Check, Clock, Settings, Store, Trash2, X, Plus, Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Bell, Check, Loader2, Settings, Store, Trash2, X, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import TemplatePreview from '../TemplatePreview';
@@ -14,11 +14,19 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
   const [loading, setLoading] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+  const [formData, setFormData] = useState({
+    shopName: '',
+    shopUrl: '',
+    consumerKey: '',
+    consumerSecret: '',
+  });
   const api_token = user?.api_token;
 
   // Clear messages after 5 seconds
@@ -95,6 +103,39 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
     fetchTemplates();
   }, [api_token]);
 
+  const handleChange = e => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (error) setError(null);
+    if (success) setSuccess(false);
+  };
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, ...formData })
+      });
+
+      const data = await response.json();
+      if (response.status === 201) {
+        setSuccess(true);
+        setFormData({ shopName: '', shopUrl: '', consumerKey: '', consumerSecret: '' });
+        setTimeout(() => onShopAdded?.(data), 2000);
+      } else {
+        throw new Error(data.message || 'Failed to add shop');
+      }
+    } catch (err) {
+      console.error('Error adding shop:', err);
+      setError(err.message || 'Failed to add shop. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleToggle = (key) => {
     setSettings(prev => ({
       ...prev,
@@ -177,7 +218,6 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
           `Shop "${data.shopName}" successfully disconnected. ${data.webhooks.deleted}/${data.webhooks.total} webhooks removed.`
         );
 
-        // Update local shops state
         const updatedShops = shops.filter(shop => shop._id !== selectedShopId);
         setShops(updatedShops);
         setSelectedShopId('');
@@ -230,7 +270,6 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
-        {/* Enhanced Sidebar */}
         <aside className="w-72 min-h-screen border-r border-gray-300 bg-white flex flex-col p-5 text-gray-700">
           {/* Brand */}
           <h2 className="text-3xl font-bold tracking-wide mb-10 text-gray-900">WooCommerce</h2>
@@ -272,15 +311,15 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
             Manage Stores
           </button>
 
-          {/* Manage Stores Modal */}
           {isManageModalOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh] overflow-y-auto">
+
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                     <Store className="w-5 h-5 text-emerald-600" />
-                    Manage Stores
+                    Manage Woo Stores
                   </h2>
                   <button
                     onClick={() => setIsManageModalOpen(false)}
@@ -290,43 +329,147 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
                   </button>
                 </div>
 
-                {/* Existing Stores List */}
-                {shops.length > 0 ? (
-                  <ul className="space-y-3 flex-grow overflow-y-auto">
-                    {shops.map((shop) => {
-                      const shopName = shop.shopName || 'Unknown Shop';
-                      return (
-                        <li
-                          key={shop._id}
-                          className="flex justify-between items-center p-3 bg-white hover:shadow-sm transition"
+                {/* Add Store Form */}
+                {isAddFormVisible ? (
+                  <div className="p-5 border rounded-lg bg-gray-50 space-y-4">
+                    <h3 className="text-md font-semibold text-gray-900">Add New WooCommerce Store</h3>
+                    <p className="text-gray-600 text-sm mb-2">
+                      Enter your WooCommerce store details to securely connect.
+                    </p>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+
+                      {/* Shop Name */}
+                      <div className="flex flex-col">
+                        <label className="text-sm font-medium text-gray-700 mb-1">Shop Name</label>
+                        <input
+                          type="text"
+                          name="shopName"
+                          value={formData.shopName}
+                          onChange={handleChange}
+                          placeholder="Enter your shop name"
+                          required
+                          className="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Store URL */}
+                      <div className="flex flex-col">
+                        <label className="text-sm font-medium text-gray-700 mb-1">Store URL</label>
+                        <input
+                          type="url"
+                          name="shopUrl"
+                          value={formData.shopUrl}
+                          onChange={handleChange}
+                          placeholder="https://example.com"
+                          required
+                          className="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Consumer Key */}
+                      <div className="flex flex-col">
+                        <label className="text-sm font-medium text-gray-700 mb-1">Consumer Key</label>
+                        <input
+                          type="text"
+                          name="consumerKey"
+                          value={formData.consumerKey}
+                          onChange={handleChange}
+                          placeholder="ck_xxxxxxxxxxxxxxxx"
+                          required
+                          className="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Consumer Secret */}
+                      <div className="flex flex-col">
+                        <label className="text-sm font-medium text-gray-700 mb-1">Consumer Secret</label>
+                        <input
+                          type="password"
+                          name="consumerSecret"
+                          value={formData.consumerSecret}
+                          onChange={handleChange}
+                          placeholder="cs_xxxxxxxxxxxxxxxx"
+                          required
+                          className="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Error/Success Messages */}
+                      {error && <p className="text-sm text-red-600">{error}</p>}
+                      {success && <p className="text-sm text-green-600">Shop added successfully!</p>}
+                      <div className="mt-4 flex gap-2">
+                        {/* Submit Button */}
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-fit bg-green-600 text-white py-3 px-4 rounded font-medium 
+                   hover:bg-green-700 focus:ring-4 focus:ring-green-200 
+                   transition-all duration-200 disabled:opacity-50 
+                   flex gap-2 shadow-lg hover:shadow-xl"
                         >
-                          <div>
-                            <span className="text-gray-800 font-medium">{shopName}</span>
-                            <p className="text-sm text-gray-600">{shop.storeUrl}</p>
-                            <p className="text-xs text-gray-500">
-                              {shop.webhooks?.length || 0} webhook(s) configured
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setSelectedShopId(shop._id);
-                              setShowDeleteConfirm(true);
-                              setIsManageModalOpen(false);
-                            }}
-                            disabled={disconnecting}
-                            className="text-red-600 hover:text-red-700 flex gap-2 items-center hover:bg-red-100 p-3 rounded transition-colors"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                            Disconnect
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" /> Adding Shop...
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-5 h-5" /> Add Shop
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setIsAddFormVisible(false)}
+                          className="w-fit flex items-center justify-center gap-2 border border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-medium px-4 py-2 rounded-lg transition"
+                        >
+                          <X className="w-4 h-4" /> Cancel
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Footer Button */}
+
+
+
+                  </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-6 text-sm">
-                    No stores connected.
-                  </p>
+                  <div className="space-y-4">
+
+                    {/* Existing Stores List */}
+                    {shops.length > 0 ? (
+                      <ul className="space-y-3 flex-grow overflow-y-auto">
+                        {shops.map((shop, idx) => (
+                          <li
+                            key={idx}
+                            className="flex justify-between items-center p-3 bg-white hover:shadow-sm transition"
+                          >
+                            <span className="text-gray-800 font-medium">{shop.shopName}</span>
+                            <button
+                              onClick={() => handleDisconnect(shop)}
+                              disabled={disconnecting}
+                              className="text-red-600 hover:text-red-700 flex gap-2 items-center hover:bg-red-100 p-2 rounded transition-colors"
+                            >
+                              <Trash2 className="w-5 h-5" /> Delete
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500 text-center py-6 text-sm">
+                        No stores connected. Click below to add one.
+                      </p>
+                    )}
+
+                    {/* Footer Button */}
+                    <div className="mt-4 flex">
+                      <button
+                        onClick={() => setIsAddFormVisible(true)}
+                        className="w-fit flex items-center justify-center gap-2 border border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-medium px-4 py-2 rounded-lg transition"
+                      >
+                        <Plus className="w-4 h-4" /> Add New Store
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -347,9 +490,7 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
           </nav>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 p-0 overflow-y-auto">
-          {/* Delete confirmation modal */}
           {showDeleteConfirm && selectedShop && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
@@ -551,8 +692,7 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
                               {/* Mobile Mockup Preview */}
                               {setting.enabled && (
                                 <div className="w-full flex justify-center mt-4">
-                                  {/* {renderTemplatePreview(setting.templateId)} */}
-                                   <TemplatePreview templateId={setting.templateId} />
+                                  <TemplatePreview templateId={setting.templateId} />
                                 </div>
                               )}
 
