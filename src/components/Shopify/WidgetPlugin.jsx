@@ -130,7 +130,7 @@ export default function WidgetPlugin({ settings, widgetEnabled, onChange }) {
 
 
                         {/* Brand Settings */}
-                        <div className="p-6 border-b border-gray-200">
+                        <div className="p-6">
                             <div className="grid md:grid-cols-2 gap-10 items-start">
                                 {/* Left: Title & Description */}
                                 <div>

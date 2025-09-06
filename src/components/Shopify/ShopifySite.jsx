@@ -6,7 +6,8 @@ import {
   MessageCircle,
   Puzzle,
   Save,
-  Store
+  Store,
+  Plus, X, Trash2
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import AutomatedMsgSettings from './AutomatedMsgSettings';
@@ -123,14 +124,15 @@ export default function ShopifySites({ shops, refreshShops }) {
     <div className="min-h-screen bg-grag-50 ">
       <div className="flex">
         {/* Enhanced Sidebar */}
-        <aside className="w-64 min-h-screen border-r bg-white flex flex-col p-4 text-gray-700">
-          <h2 className="text-sm font-semibold mb-2">Shopify</h2>
+        <aside className="w-72 min-h-screen border-r border-gray-300 bg-white flex flex-col p-5 text-gray-700">
+          {/* Brand */}
+          <h2 className="text-3xl font-bold tracking-wide mb-10 text-gray-900">Shopify</h2>
 
           {/* Store Selector */}
           <select
             value={selectedShop}
             onChange={handleShopChange}
-            className="w-full border rounded-lg px-3 py-2 mb-6 text-sm"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-6 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           >
             {shops.map((shop, idx) => {
               const shopName = shop.shop.split(".")[0];
@@ -142,96 +144,117 @@ export default function ShopifySites({ shops, refreshShops }) {
             })}
           </select>
 
-          {/* Delete Store Button */}
+          {/* Manage Stores */}
           <button
             onClick={() => setIsManageModalOpen(true)}
-            className="mb-6 text-sm bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg flex items-center justify-center gap-2"
+            className="text-sm hover:border hover:border-gray-200 text-black hover:bg-blue-50 py-2 px-3 rounded-lg flex items-center gap-2 font-medium transition-all duration-200"
           >
             <Store className="w-4 h-4" />
             Manage Stores
           </button>
+
+          {/* Manage Stores Modal */}
           {isManageModalOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold">Manage Stores</h2>
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <Store className="w-5 h-5 text-emerald-600" />
+                    Manage Stores
+                  </h2>
                   <button
                     onClick={() => setIsManageModalOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-400 hover:text-gray-600 transition"
                   >
-                    ✕
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Add Store Button */}
-                <div className="mb-4">
-                  <button
-                    onClick={() => setIsAddFormVisible(!isAddFormVisible)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 w-full"
-                  >
-                    {isAddFormVisible ? 'Cancel' : 'Add New Store'}
-                  </button>
-                </div>
-
-                {/* Add Store Form - Similar to ShopifyPlugin */}
-                {isAddFormVisible && (
-                  <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-                    <h3 className="text-md font-semibold mb-3 text-gray-900">Add New Shopify Store</h3>
+                {/* Add Store Form */}
+                {isAddFormVisible ? (
+                  <div className="p-5 border rounded-lg bg-gray-50">
+                    <h3 className="text-md font-semibold mb-2 text-gray-900">Add New Shopify Store</h3>
                     <p className="text-gray-600 text-sm mb-4">
-                      Enter your Shopify domain to connect your store
+                      Enter your Shopify domain to securely connect your store.
                     </p>
-                    <div className="flex w-full shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="flex w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                       <input
                         type="text"
                         value={newShop}
                         onChange={(e) => setNewShop(e.target.value)}
                         placeholder="example.myshopify.com"
-                        className="flex-grow px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none rounded-l-lg"
+                        className="flex-grow px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none"
                       />
                       <button
                         onClick={handleAddStore}
-                        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 transition-all duration-200 rounded-r-lg"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 transition"
                       >
                         Install
                       </button>
                     </div>
                   </div>
+                ) : (
+                  <>
+                    {/* Existing Stores List */}
+                    {shops.length > 0 ? (
+                      <ul className="space-y-3 flex-grow overflow-y-auto">
+                        {shops.map((shop, idx) => {
+                          const shopName = shop.shop.split(".")[0];
+                          return (
+                            <li
+                              key={idx}
+                              className="flex justify-between items-center  p-3 bg-white hover:shadow-sm transition"
+                            >
+                              <span className="text-gray-800 font-medium">{shopName}</span>
+                              <button
+                                onClick={() => handleDeleteShop(shop.shop)}
+                                disabled={deleting}
+                                className="text-red-600 hover:text-red-700 flex gap-2 items-center hover:bg-red-100 p-3 rounded transition-colors"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                                Delete
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500 text-center py-6 text-sm">
+                        No stores connected. Click below to add one.
+                      </p>
+                    )}
+                  </>
                 )}
 
-                {/* Existing Stores List */}
-                {shops.length > 0 ? (
-                  <ul className="space-y-3">
-                    {shops.map((shop, idx) => {
-                      const shopName = shop.shop.split(".")[0];
-                      return (
-                        <li key={idx} className="flex justify-between items-center border rounded-lg p-3">
-                          <span>{shopName}</span>
-                          <button
-                            onClick={() => handleDeleteShop(shop.shop)}
-                            disabled={deleting}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm"
-                          >
-                            {deleting ? "Deleting..." : "Delete"}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 text-center py-4">
-                    {isAddFormVisible ? '' : 'No stores connected. Click "Add New Store" to get started.'}
-                  </p>
-                )}
+                {/* Footer Button */}
+                <div className="mt-6 pt-4">
+                  <button
+                    onClick={() => setIsAddFormVisible(!isAddFormVisible)}
+                    className="w-fit flex items-center justify-center gap-2 border border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-medium px-4 py-2 rounded-lg transition"
+                  >
+                    {isAddFormVisible ? (
+                      <>
+                        <X className="w-4 h-4" /> Cancel
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" /> Add New Store
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}
-          {/* Menu */}
-          <nav className="space-y-1 text-sm">
+
+          {/* Sidebar Menu */}
+          <nav className="space-y-1 text-sm mt-2">
             <button
               onClick={() => setSelectedSection("widget")}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left ${selectedSection === "widget"
+              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left transition ${selectedSection === "widget"
                 ? "bg-emerald-50 text-emerald-700 font-medium"
-                : "hover:bg-gray-100"
+                : "hover:bg-gray-100 text-gray-700"
                 }`}
             >
               <Puzzle className="w-4 h-4" />
@@ -240,16 +263,17 @@ export default function ShopifySites({ shops, refreshShops }) {
 
             <button
               onClick={() => setSelectedSection("automatedMsg")}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left ${selectedSection === "automatedMsg"
+              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left transition ${selectedSection === "automatedMsg"
                 ? "bg-emerald-50 text-emerald-700 font-medium"
-                : "hover:bg-gray-100"
+                : "hover:bg-gray-100 text-gray-700"
                 }`}
             >
               <MessageCircle className="w-4 h-4" />
-              Automated Message
+              Automated Messages
             </button>
           </nav>
         </aside>
+
 
         <main className="flex-1 p- overflow-y-auto">
           {loading ? (
@@ -319,7 +343,7 @@ export default function ShopifySites({ shops, refreshShops }) {
                     )}
 
                     {/* 🔹 Single Save Button */}
-                    <div className="pt-8 flex justify-end border-t border-gray-200 mt-8">
+                    <div className="pt-8 flex justify-end mt-8">
                       <button
                         onClick={handleSave}
                         disabled={!hasChanges || saving}

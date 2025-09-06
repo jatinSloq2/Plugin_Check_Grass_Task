@@ -491,7 +491,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
 
                         {/* Template Selector */}
                         {fallback.enabled && (
-                            <div className="w-full">
+                            <div className="w-fit">
                                 <label className="block text-sm font-medium mb-1 text-gray-700">
                                     Select Template
                                 </label>
