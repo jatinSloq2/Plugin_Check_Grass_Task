@@ -163,323 +163,390 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         onChange(updated);
     };
 
+
+    const PhonePreview = ({ children }) => (
+        <div className="relative w-[320px] h-[640px]">
+            {/* Phone Frame Image
+            <img
+                src="https://web-mobile-first.s3.eu-west-3.amazonaws.com/production/mockup_apple_iphone_13_2021_793ab5435d.png"
+                alt="phone"
+                className="w-full h-full object-contain"
+            /> */}
+
+            {/* WhatsApp Screen Area */}
+            <div className="absolute top-[60px] left-[25px] w-[270px] h-[520px] rounded-[1.5rem] overflow-hidden bg-[url('https://i.pinimg.com/564x/d2/a7/76/d2a77609f5d97b9081b117c8f699bd37.jpg')] bg-cover bg-center flex flex-col">
+                {/* WhatsApp Header */}
+                <div className="bg-green-600 text-white p-2 flex items-center gap-2">
+                    <img
+                        src="https://i.pravatar.cc/40"
+                        alt="contact"
+                        className="w-8 h-8 rounded-full"
+                    />
+                    <div>
+                        <p className="font-semibold text-sm">John Doe</p>
+                        <p className="text-xs text-green-100">online</p>
+                    </div>
+                </div>
+
+                {/* Chat Area */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+
     const renderTemplatePreview = (templateId) => {
         if (!templateId) return null;
         const detail = templateDetails[templateId];
 
         if (loadingId === templateId) {
-            return <div className="mt-2 text-sm text-gray-700">Loading preview...</div>;
+            return <div className="text-gray-500 text-sm">Loading preview...</div>;
         }
-
         if (!detail) {
-            return <div className="mt-2 text-sm text-gray-700">No preview available</div>;
+            return <div className="text-gray-500 text-sm">No preview available</div>;
         }
 
         const { components = [] } = detail;
 
         return (
-            <div className="bg-gray-50 border border-gray-300 p-3 rounded mt-2 text-sm text-gray-700">
-                <strong>Preview:</strong>
-                <div className="mt-2 space-y-2">
-                    {components.map((component, i) => {
-                        if (component.type === 'HEADER') {
-                            if (component.format === 'IMAGE' && component.image_url) {
-                                return (
-                                    <img
-                                        key={i}
-                                        src={component.image_url}
-                                        alt="Header"
-                                        className="max-w-full h-auto rounded border"
-                                    />
-                                );
-                            } else if (component.format === 'VIDEO' && component.image_url) {
-                                return (
-                                    <video
-                                        key={i}
-                                        controls
-                                        className="max-w-full h-auto rounded border"
+            <PhonePreview>
+                {components.map((component, i) => {
+                    if (component.type === "HEADER" && component.text) {
+                        return (
+                            <div key={i} className="max-w-[75%] bg-gray-200 p-2 rounded-xl self-start">
+                                {component.text}
+                            </div>
+                        );
+                    }
+
+                    if (component.type === "BODY" && component.text) {
+                        return (
+                            <div key={i} className="max-w-[75%] bg-green-100 p-2 rounded-xl self-end">
+                                {component.text}
+                            </div>
+                        );
+                    }
+
+                    if (component.type === "FOOTER" && component.text) {
+                        return (
+                            <div key={i} className="max-w-[60%] bg-gray-100 p-2 rounded-lg text-xs self-start">
+                                {component.text}
+                            </div>
+                        );
+                    }
+
+                    if (component.type === "BUTTONS" && component.buttons?.length > 0) {
+                        return (
+                            <div key={i} className="flex flex-col gap-2 self-end mt-2">
+                                {component.buttons.map((btn, index) => (
+                                    <button
+                                        key={index}
+                                        disabled
+                                        className="bg-green-600 text-white px-3 py-1 rounded-full text-sm"
                                     >
-                                        <source src={component.image_url} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                );
-                            } else if (component.format === 'TEXT' && component.text) {
-                                return <p key={i} className="font-semibold">{component.text}</p>;
-                            }
-                        }
+                                        {btn.text}
+                                    </button>
+                                ))}
+                            </div>
+                        );
+                    }
 
-                        if (component.type === 'BODY' && component.text) {
-                            return <p key={i} className="whitespace-pre-line">{component.text}</p>;
-                        }
-
-                        if (component.type === 'FOOTER' && component.text) {
-                            return <p key={i} className="text-gray-500 text-xs">{component.text}</p>;
-                        }
-
-                        if (component.type === 'BUTTONS' && component.buttons?.length > 0) {
-                            return (
-                                <div key={i} className="flex gap-2 flex-wrap">
-                                    {component.buttons.map((btn, index) => {
-                                        if (btn.type === 'URL') {
-                                            return (
-                                                <a
-                                                    key={index}
-                                                    href={btn.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded"
-                                                >
-                                                    {btn.text}
-                                                </a>
-                                            );
-                                        } else if (btn.type === 'PHONE_NUMBER') {
-                                            return (
-                                                <a
-                                                    key={index}
-                                                    href={`tel:${btn.number}`}
-                                                    className="inline-block bg-green-600 text-white text-sm px-3 py-1 rounded"
-                                                >
-                                                    {btn.text}
-                                                </a>
-                                            );
-                                        } else if (btn.type === 'QUICK_REPLY') {
-                                            return (
-                                                <button
-                                                    key={index}
-                                                    disabled
-                                                    className="inline-block bg-gray-400 text-white text-sm px-3 py-1 rounded"
-                                                >
-                                                    {btn.text}
-                                                </button>
-                                            );
-                                        }
-                                        return null;
-                                    })}
-                                </div>
-                            );
-                        }
-
-                        return null;
-                    })}
-
-                </div>
-            </div>
+                    return null;
+                })}
+            </PhonePreview>
         );
     };
 
-
-
-    const renderLeftText = () => (
-        <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Automated Messaging Settings</h2>
-            <p className="text-gray-600 text-base leading-relaxed">
-                Customize automated messages sent to your customers when they create, fulfill, or cancel orders. For abandoned carts, you can schedule up to 3 timed reminders.
-            </p>
-        </div>
-    );
-
-    const renderMsgType = (type, label) => {
+    const renderMsgType = (type, label, description = "Hi this is the description of this") => {
         const msgSetting = localSettings[type];
 
+        const cardClasses =
+            "border border-gray-200 rounded p-6 mb-6 bg-white shadow-sm";
+
+        const sectionTitle =
+            "font-semibold text-lg mb-2 text-gray-900 flex items-center gap-2";
+
+        const radioWrapper =
+            "flex items-center space-x-2 bg-white text-blue-100 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-green-500 transition";
+
+        const inputBase =
+            "border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500";
+
+        const descriptionText =
+            "text-md text-gray-600 leading-relaxed mb-4 max-w-lg";
+
         if (type === "cartAbandoned" && msgSetting?.messages?.length > 0) {
+            const [selectedReminder, setSelectedReminder] = useState(0); // default Reminder 1
+            const currentMsg = msgSetting.messages[selectedReminder];
+
             return (
-                <div className="border rounded p-4 mb-6 bg-white shadow-sm">
-                    <h3 className="font-semibold text-lg mb-4">{label}</h3>
+                <div className={cardClasses}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                        {/* LEFT COLUMN */}
+                        <div>
+                            <h3 className={sectionTitle}>{label}</h3>
+                            <p className={descriptionText}>{description}</p>
+                        </div>
 
-                    <div className="flex items-center mb-4 space-x-4">
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="radio"
-                                name={`${type}_enabled`}
-                                checked={msgSetting.enabled}
-                                onChange={() => handleToggle(type, true)}
-                            />
-                            <span>Enabled</span>
-                        </label>
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="radio"
-                                name={`${type}_enabled`}
-                                checked={!msgSetting.enabled}
-                                onChange={() => handleToggle(type, false)}
-                            />
-                            <span>Disabled</span>
-                        </label>
-                    </div>
-
-                    {msgSetting.enabled && msgSetting.messages.map((msg, index) => (
-                        <div key={index} className="border-t pt-4 mt-4">
-                            <h4 className="font-semibold text-md mb-2">Reminder {index + 1}</h4>
-
-                            <div className="flex items-center mb-3 space-x-4">
-                                <label className="flex items-center space-x-2">
+                        {/* RIGHT COLUMN */}
+                        <div className="flex flex-col items-start gap-6 w-full bg-gray-50 p-10">
+                            {/* Enable/Disable */}
+                            <div className="flex items-center gap-6">
+                                <label className={radioWrapper}>
                                     <input
-                                        type="checkbox"
-                                        checked={msg.enabled}
-                                        onChange={(e) =>
-                                            updateCartAbandonedMessage(index, 'enabled', e.target.checked)
-                                        }
+                                        type="radio"
+                                        className="text-green-600 focus:ring-green-500"
+                                        name={`${type}_enabled`}
+                                        checked={msgSetting.enabled}
+                                        onChange={() => handleToggle(type, true)}
                                     />
-                                    <span>Enabled</span>
+                                    <span className="text-gray-800 font-medium">Enabled</span>
+                                </label>
+                                <label className={radioWrapper}>
+                                    <input
+                                        type="radio"
+                                        className="text-green-600 focus:ring-green-500"
+                                        name={`${type}_enabled`}
+                                        checked={!msgSetting.enabled}
+                                        onChange={() => handleToggle(type, false)}
+                                    />
+                                    <span className="text-gray-800 font-medium">Disabled</span>
                                 </label>
                             </div>
 
-                            <div className="mb-3 flex items-center gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Delay Value</label>
-                                    <input
-                                        type="number"
-                                        className="w-24 border rounded px-2 py-1"
-                                        value={msg.delay?.value || 0}
-                                        onChange={(e) =>
-                                            updateCartAbandonedDelay(index, 'value', Number(e.target.value))
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Delay Unit</label>
+                            {/* Reminder Selection */}
+                            {msgSetting.enabled && (
+                                <div className="w-full">
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                                        Select Reminder
+                                    </label>
                                     <select
-                                        className="border rounded px-2 py-1"
-                                        value={msg.delay?.unit || 'minutes'}
-                                        onChange={(e) =>
-                                            updateCartAbandonedDelay(index, 'unit', e.target.value)
-                                        }
+                                        className={`${inputBase} w-full`}
+                                        value={selectedReminder}
+                                        onChange={(e) => setSelectedReminder(Number(e.target.value))}
                                     >
-                                        <option value="minutes">Minutes</option>
-                                        <option value="hours">Hours</option>
-                                        <option value="days">Days</option>
+                                        {msgSetting.messages.map((_, index) => (
+                                            <option key={index} value={index}>
+                                                Reminder {index + 1}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="mb-3">
-                                <label className="block text-sm font-medium mb-1">Select Template</label>
-                                <select
-                                    className="w-full border rounded px-3 py-2"
-                                    value={String(msg.templateId || '')}
-                                    onChange={(e) =>
-                                        updateCartAbandonedMessage(index, 'templateId', e.target.value)
-                                    }
-                                >
-                                    <option value="">-- Select a Template --</option>
-                                    {templates.map((tpl) => (
-                                        <option key={tpl.id} value={String(tpl.id)}>
-                                            {tpl.name} ({tpl.id})
-                                        </option>
-                                    ))}
-                                </select>
-
-                                {msg.templateId && (
-                                    <div className="text-sm text-gray-600 mt-1">
-                                        Selected: {templates.find(t => String(t.id) === String(msg.templateId))?.name || 'Unknown Template'}
+                            {/* Reminder Settings */}
+                            {msgSetting.enabled && currentMsg && (
+                                <>
+                                    {/* Checkbox */}
+                                    <div className="flex items-center space-x-3">
+                                        <label className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                className="text-green-600 rounded focus:ring-green-500"
+                                                checked={currentMsg.enabled}
+                                                onChange={(e) =>
+                                                    updateCartAbandonedMessage(
+                                                        selectedReminder,
+                                                        "enabled",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                            />
+                                            <span className="text-gray-800 font-medium">Enabled</span>
+                                        </label>
                                     </div>
-                                )}
 
-                                {renderTemplatePreview(msg.templateId)}
-                            </div>
+                                    {/* Delay */}
+                                    <div className="flex items-center gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1 text-gray-700">
+                                                Delay Value
+                                            </label>
+                                            <input
+                                                type="number"
+                                                className={`${inputBase} w-28`}
+                                                value={currentMsg.delay?.value || 0}
+                                                onChange={(e) =>
+                                                    updateCartAbandonedDelay(
+                                                        selectedReminder,
+                                                        "value",
+                                                        +e.target.value
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1 text-gray-700">
+                                                Delay Unit
+                                            </label>
+                                            <select
+                                                className={inputBase}
+                                                value={currentMsg.delay?.unit || "minutes"}
+                                                onChange={(e) =>
+                                                    updateCartAbandonedDelay(
+                                                        selectedReminder,
+                                                        "unit",
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                <option value="minutes">Minutes</option>
+                                                <option value="hours">Hours</option>
+                                                <option value="days">Days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Template Selector */}
+                                    <div className="w-full">
+                                        <label className="block text-sm font-medium mb-1 text-gray-700">
+                                            Select Template
+                                        </label>
+                                        <select
+                                            className={`${inputBase} w-full`}
+                                            value={String(currentMsg.templateId || "")}
+                                            onChange={(e) =>
+                                                updateCartAbandonedMessage(
+                                                    selectedReminder,
+                                                    "templateId",
+                                                    e.target.value
+                                                )
+                                            }
+                                        >
+                                            <option value="">-- Select a Template --</option>
+                                            {templates.map((tpl) => (
+                                                <option key={tpl.id} value={String(tpl.id)}>
+                                                    {tpl.name} ({tpl.id})
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {currentMsg.templateId && (
+                                            <div className="text-sm text-gray-600 mt-2">
+                                                Selected:{" "}
+                                                {
+                                                    templates.find(
+                                                        (t) => String(t.id) === String(currentMsg.templateId)
+                                                    )?.name
+                                                }
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Preview */}
+                                    <div className="w-full flex justify-center">
+                                        {renderTemplatePreview(currentMsg.templateId)}
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    ))}
+                    </div>
                 </div>
             );
         }
 
-        const fallback = msgSetting || { enabled: false, templateId: '' };
+        // Fallback for others
+        const fallback = msgSetting || { enabled: false, templateId: "" };
 
         return (
-            <div className="border rounded p-4 mb-6 bg-white shadow-sm">
-                <h3 className="font-semibold text-lg mb-2">{label}</h3>
+            <div className={cardClasses}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    {/* LEFT COLUMN → Label + Description */}
+                    <div>
+                        <h3 className={sectionTitle}>{label}</h3>
+                        <p className={descriptionText}>{description}</p>
+                    </div>
 
-                <div className="flex items-center mb-4 space-x-4">
-                    <label className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            name={`${type}_enabled`}
-                            checked={fallback.enabled}
-                            onChange={() => handleToggle(type, true)}
-                        />
-                        <span>Enabled</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            name={`${type}_enabled`}
-                            checked={!fallback.enabled}
-                            onChange={() => handleToggle(type, false)}
-                        />
-                        <span>Disabled</span>
-                    </label>
-                </div>
+                    {/* RIGHT COLUMN → Radios, Template, Preview */}
+                    <div className="flex flex-col items-start gap-6 bg-gray-50 p-10">
+                        {/* Radio Buttons */}
+                        <div className="flex items-center gap-6">
+                            <label className={radioWrapper}>
+                                <input
+                                    type="radio"
+                                    className="text-green-600 focus:ring-green-500"
+                                    name={`${type}_enabled`}
+                                    checked={fallback.enabled}
+                                    onChange={() => handleToggle(type, true)}
+                                />
+                                <span className="text-gray-800 font-medium">Enabled</span>
+                            </label>
+                            <label className={radioWrapper}>
+                                <input
+                                    type="radio"
+                                    className="text-green-600 focus:ring-green-500"
+                                    name={`${type}_enabled`}
+                                    checked={!fallback.enabled}
+                                    onChange={() => handleToggle(type, false)}
+                                />
+                                <span className="text-gray-800 font-medium">Disabled</span>
+                            </label>
+                        </div>
 
-                {fallback.enabled && (
-                    <>
-                        {/* Delay Settings – only if delay is present */}
-                        {fallback.delay && (
-                            <div className="mb-3 flex items-center gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Delay Value</label>
-                                    <input
-                                        type="number"
-                                        className="w-24 border rounded px-2 py-1"
-                                        value={fallback.delay?.value || 0}
-                                        onChange={(e) =>
-                                            handleInputChange(type, 'delay', {
-                                                ...fallback.delay,
-                                                value: Number(e.target.value)
-                                            })
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Delay Unit</label>
-                                    <select
-                                        className="border rounded px-2 py-1"
-                                        value={fallback.delay?.unit || 'minutes'}
-                                        onChange={(e) =>
-                                            handleInputChange(type, 'delay', {
-                                                ...fallback.delay,
-                                                unit: e.target.value
-                                            })
-                                        }
-                                    >
-                                        <option value="minutes">Minutes</option>
-                                        <option value="hours">Hours</option>
-                                        <option value="days">Days</option>
-                                    </select>
-                                </div>
+                        {/* Template Selector */}
+                        {fallback.enabled && (
+                            <div className="w-full">
+                                <label className="block text-sm font-medium mb-1 text-gray-700">
+                                    Select Template
+                                </label>
+                                <select
+                                    className={`${inputBase} w-full`}
+                                    value={fallback.templateId || ""}
+                                    onChange={(e) =>
+                                        handleInputChange(type, "templateId", e.target.value)
+                                    }
+                                >
+                                    <option value="">-- Select a Template --</option>
+                                    {templates.map((tpl) => (
+                                        <option key={tpl.id} value={tpl.id}>
+                                            {tpl.name} ({tpl.id})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         )}
 
-                        {/* Template Dropdown */}
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Select Template</label>
-                            <select
-                                className="w-full border rounded px-3 py-2"
-                                value={fallback.templateId || ''}
-                                onChange={(e) => handleInputChange(type, 'templateId', e.target.value)}
-                            >
-                                <option value="">-- Select a Template --</option>
-                                {templates.map((tpl) => (
-                                    <option key={tpl.id} value={tpl.id}>
-                                        {tpl.name} ({tpl.id})
-                                    </option>
-                                ))}
-                            </select>
-                            {renderTemplatePreview(fallback.templateId)}
-                        </div>
-                    </>
-                )}
+                        {/* Phone Preview */}
+                        {fallback.enabled && (
+                            <div className="w-full flex justify-center">
+                                {renderTemplatePreview(fallback.templateId)}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
+
         );
     };
 
     return (
-        <div className="p-6 bg-gray-100 rounded-lg shadow">
-            {renderLeftText()}
-            {renderMsgType('orderCreated', 'Order Created')}
-            {renderMsgType('orderCanceled', 'Order Canceled')}
-            {renderMsgType('orderFulfilled', 'Order Fulfilled')}
-            {renderMsgType('afterOrderFulfilled', 'After Order Fulfilled')}
-            {renderMsgType('cartAbandoned', 'Cart Abandoned')}
+        <div className="p-6">
+            {renderMsgType(
+                'orderCreated',
+                'Order Created',
+                'This automated WhatsApp message is sent to the customer immediately after placing an order. Templates are pre-approved by WhatsApp and cannot be modified.'
+            )}
+            {renderMsgType(
+                'orderCanceled',
+                'Order Canceled',
+                'Sent when an order is canceled by the customer or merchant. Templates cannot be edited once approved by WhatsApp.'
+            )}
+            {renderMsgType(
+                'orderFulfilled',
+                'Order Fulfilled',
+                'Sent after the order has been fulfilled. Lets customers know their items are on the way.'
+            )}
+            {renderMsgType(
+                'afterOrderFulfilled',
+                'After Order Fulfilled',
+                'Follow-up message sent after order delivery to increase customer engagement. Templates require WhatsApp approval.'
+            )}
+            {renderMsgType(
+                'cartAbandoned',
+                'Abandoned Recovery Message',
+                'Recover abandoned carts by reaching your customers on WhatsApp. Message is sent 5 minutes after customer abandons cart. Automated WhatsApp message templates cannot be modified or edited, because templates need to be pre-approved by WhatsApp before they can be sent using the API.'
+            )}
         </div>
     );
 }

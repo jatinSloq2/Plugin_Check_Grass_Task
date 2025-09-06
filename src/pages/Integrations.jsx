@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { integrations } from '../Constants';
+import { useNavigate } from 'react-router-dom';
 
 const Integrations = () => {
-
+    const navigate = useNavigate();
     const [integrationName, setIntegrationName] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
 
     const handleIntegrationClick = (link) => {
         console.log(`Navigating to: ${link}`);
-        window.location.href = link;
+
+        if (link.startsWith("http")) {
+            window.open(link, "_blank");
+        } else {
+            navigate(link);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -25,19 +31,17 @@ const Integrations = () => {
 
     return (
         <div className="min-h-screen bg-[#F9FAFB]">
-            <div className="mx-auto p-8">
-                {/* Header */}
-                <div className="mb-12">
-                    <h1 className="text-2xl font-bold text-black mb-3">
-                        Connect <span className="text-green-600">AI Green Tick</span> to your favorite services
-                    </h1>
-                    <p className="text-md text-muted-foreground max-w-4xl">
-                        Our powerful integrations make it quick and easy to get the most out of AI Green Tick —
-                        from automating customer communications to seamless CRM integration and workflow
-                        automation.
-                    </p>
-                </div>
-
+            <div className="mx-auto p-8 bg-white">
+                <h1 className="text-2xl font-bold text-black mb-3">
+                    Connect <span className="text-green-600">AI Green Tick</span> to your favorite services
+                </h1>
+                <p className="text-md text-muted-foreground max-w-4xl">
+                    Our powerful integrations make it quick and easy to get the most out of AI Green Tick —
+                    from automating customer communications to seamless CRM integration and workflow
+                    automation.
+                </p>
+            </div>
+            <div className="mx-auto p-8 ">
                 {/* Integrations Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                     {integrations.map((integration) => (
@@ -93,7 +97,7 @@ const Integrations = () => {
                         </div>
                     ))}
                     {/* Request Form Section */}
-                    <div className="h-60 rounded p-8 bg-white border border-gray-200 hover:shadow-lg hover:shadow-green-100/50 
+                    <div className="h-70 rounded p-8 bg-white border border-gray-200 hover:shadow-lg hover:shadow-green-100/50 
                          transition-all duration-300 cursor-pointer hover:scale-105 group relative overflow-hidden">
                         <h2 className="text-md font-semibold text-gray-900 mb-1">
                             Didn’t find what you’re looking for?

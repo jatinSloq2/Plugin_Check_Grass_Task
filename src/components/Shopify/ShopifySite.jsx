@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from 'react';
 import AutomatedMsgSettings from './AutomatedMsgSettings';
 import WidgetPlugin from './WidgetPlugin';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ShopifySites({ shops, refreshShops }) {
   const [selectedShop, setSelectedShop] = useState('');
@@ -24,6 +25,7 @@ export default function ShopifySites({ shops, refreshShops }) {
   const [error, setError] = useState(null);
   const [isAddFormVisible, setIsAddFormVisible] = useState(false);
   const [newShop, setNewShop] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     if (shops.length > 0) {
@@ -118,7 +120,7 @@ export default function ShopifySites({ shops, refreshShops }) {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-grag-50 ">
       <div className="flex">
         {/* Enhanced Sidebar */}
         <aside className="w-64 min-h-screen border-r bg-white flex flex-col p-4 text-gray-700">
@@ -249,8 +251,7 @@ export default function ShopifySites({ shops, refreshShops }) {
           </nav>
         </aside>
 
-        {/* Enhanced Main Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p- overflow-y-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96 text-gray-500">
               <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mb-4" />
@@ -267,102 +268,65 @@ export default function ShopifySites({ shops, refreshShops }) {
             </div>
           ) : (
             <>
-              {selectedSection === 'widget' && (
-                <section className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden">
+              {(selectedSection === 'widget' || selectedSection === 'automatedMsg') && (
+                <section className="bg-gray-50 backdrop-blur-xl shadow-xl">
                   {/* Section Header */}
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-6">
+                  <div
+                    className={`px-8 py-6`}
+                  >
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white/20 rounded-xl">
-                        <Puzzle className="w-6 h-6 text-white" />
-                      </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white">
-                          Widget Settings
+                        <h2 className="text-3xl font-bold text-foreground">
+                          {selectedSection === 'widget' ? 'Widget Settings' : 'WhatsApp Automation'}
                         </h2>
-                        <p className="text-emerald-100">
-                          Configure your chat widget for <span className="font-semibold">{selectedShop}</span>
+                        <p
+                          className={
+                            selectedSection === 'widget'
+                              ? 'text-muted-foreground'
+                              : 'text-muted-foreground'
+                          }
+                        >
+                          {selectedSection === 'widget'
+                            ? <>Configure your chat widget for <span className="font-semibold">{selectedShop}</span></>
+                            : <>Set up automated messages for <span className="font-semibold">{selectedShop}</span></>
+                          }
                         </p>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-8">
-                    <WidgetPlugin
-                      settings={widgetSettings}
-                      widgetEnabled={widgetSettings.widgetEnabled}
-                      onChange={(newSettings) => {
-                        setWidgetSettings(newSettings);
-                        setHasChanges(true);
-                      }}
-                    />
+                    {selectedSection === 'widget' ? (
+                      <WidgetPlugin
+                        settings={widgetSettings}
+                        widgetEnabled={widgetSettings.widgetEnabled}
+                        onChange={(newSettings) => {
+                          setWidgetSettings(newSettings);
+                          setHasChanges(true);
+                        }}
+                      />
+                    ) : (
+                      <AutomatedMsgSettings
+                        settings={widgetSettings.automatedMsg}
+                        onChange={(updatedAutomatedMsg) => {
+                          setWidgetSettings((prev) => ({
+                            ...prev,
+                            automatedMsg: updatedAutomatedMsg,
+                          }));
+                          setHasChanges(true);
+                        }}
+                      />
+                    )}
 
-                    {/* Save Button */}
+                    {/* 🔹 Single Save Button */}
                     <div className="pt-8 flex justify-end border-t border-gray-200 mt-8">
                       <button
                         onClick={handleSave}
                         disabled={!hasChanges || saving}
                         className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold transition-all duration-200 ${hasChanges && !saving
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
-                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          }`}
-                      >
-                        {saving ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            Saving Changes...
-                          </>
-                        ) : hasChanges ? (
-                          <>
-                            <Save className="w-5 h-5" />
-                            Save Changes
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="w-5 h-5" />
-                            All Saved
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              {selectedSection === 'automatedMsg' && (
-                <section className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden">
-                  {/* Section Header */}
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white/20 rounded-xl">
-                        <MessageCircle className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white">
-                          WhatsApp Automation
-                        </h2>
-                        <p className="text-blue-100">
-                          Set up automated messages for <span className="font-semibold">{selectedShop}</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-8">
-                    <AutomatedMsgSettings
-                      settings={widgetSettings.automatedMsg}
-                      onChange={(updatedAutomatedMsg) => {
-                        setWidgetSettings(prev => ({ ...prev, automatedMsg: updatedAutomatedMsg }));
-                        setHasChanges(true);
-                      }}
-                    />
-
-                    {/* Save Button */}
-                    <div className="pt-8 flex justify-end border-t border-gray-200 mt-8">
-                      <button
-                        onClick={handleSave}
-                        disabled={!hasChanges || saving}
-                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold transition-all duration-200 ${hasChanges && !saving
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
+                          ? `
+                            bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700
+                          text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95`
                           : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                           }`}
                       >
@@ -388,6 +352,7 @@ export default function ShopifySites({ shops, refreshShops }) {
                 </section>
               )}
             </>
+
           )}
         </main>
       </div>
