@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AlertCircle, AlertTriangle, Bell, Check, Loader2, Settings, Store, Trash2, X, Plus } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Bell, Check, Loader2, Plus, Settings, Store, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import TemplatePreview from '../TemplatePreview';
@@ -271,38 +271,29 @@ const WooNotificationSettings = ({ onAllShopsDeleted }) => {
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         <aside className="w-72 min-h-screen border-r border-gray-300 bg-white flex flex-col p-5 text-gray-700">
-          {/* Brand */}
           <h2 className="text-3xl font-bold tracking-wide mb-10 text-gray-900">WooCommerce</h2>
 
-          {/* Store Selector or Display */}
-          {shops.length === 1 ? (
-            <div className="w-full border border-gray-300 rounded px-3 py-2 mb-6 text-sm bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Store className="w-4 h-4 text-emerald-600" />
-                <span className="font-medium text-gray-800">
-                  {shops[0].shopName || 'Unknown Shop'}
-                </span>
-              </div>
-            </div>
-          ) : (
+          {shops.length > 1 ? (
             <select
-              value={selectedShopId}
+              value={selectedShop}
               onChange={(e) => setSelectedShopId(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-6 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             >
-              <option value="">-- Choose a shop --</option>
-              {shops.map(shop => {
-                const shopName = shop.shopName || 'Unknown Shop';
+              {shops.map((shop, idx) => {
+                const shopName = shop.shop.split(".")[0];
                 return (
-                  <option key={shop._id} value={shop._id}>
+                  <option key={idx} value={shop.shop}>
                     {shopName}
                   </option>
                 );
               })}
             </select>
-          )}
+          ) : shops.length === 1 ? (
+            <p className="mb-6 text-lg hover:border hover:border-gray-200 text-black hover:bg-blue-50 py-2 px-3 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium">
+              {shops[0].shopName || 'Unknown Shop'}
+            </p>
+          ) : null}
 
-          {/* Manage Stores */}
           <button
             onClick={() => setIsManageModalOpen(true)}
             className="text-sm hover:border hover:border-gray-200 text-black hover:bg-blue-50 py-2 px-3 rounded-lg flex items-center gap-2 font-medium transition-all duration-200"

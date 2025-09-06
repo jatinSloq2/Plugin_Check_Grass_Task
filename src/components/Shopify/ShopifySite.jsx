@@ -129,20 +129,26 @@ export default function ShopifySites({ shops, refreshShops }) {
           <h2 className="text-3xl font-bold tracking-wide mb-10 text-gray-900">Shopify</h2>
 
           {/* Store Selector */}
-          <select
-            value={selectedShop}
-            onChange={handleShopChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-6 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-          >
-            {shops.map((shop, idx) => {
-              const shopName = shop.shop.split(".")[0];
-              return (
-                <option key={idx} value={shop.shop}>
-                  {shopName}
-                </option>
-              );
-            })}
-          </select>
+          {shops.length > 1 ? (
+            <select
+              value={selectedShop}
+              onChange={handleShopChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-6 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            >
+              {shops.map((shop, idx) => {
+                const shopName = shop.shop.split(".")[0];
+                return (
+                  <option key={idx} value={shop.shop}>
+                    {shopName}
+                  </option>
+                );
+              })}
+            </select>
+          ) : shops.length === 1 ? (
+            <p className="mb-6 text-lg hover:border hover:border-gray-200 text-black hover:bg-blue-50 py-2 px-3 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium">
+              {shops[0].shop.split(".")[0]}
+            </p>
+          ) : null}
 
           {/* Manage Stores */}
           <button
