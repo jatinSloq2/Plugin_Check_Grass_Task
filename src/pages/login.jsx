@@ -14,7 +14,7 @@ const Login = () => {
     const res = await login({ email, password });
     if (res.success) {
       setMessage('Login successful!');
-      navigate('/');
+      navigate('/integrations');
     } else {
       setMessage(res.message || 'Login failed.');
     }
