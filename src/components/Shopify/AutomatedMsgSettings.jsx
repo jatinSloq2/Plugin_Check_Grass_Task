@@ -165,16 +165,18 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
 
 
     const PhonePreview = ({ children }) => (
-        <div className="relative w-[320px] h-[640px]">
-            {/* Phone Frame Image
+        <div className="relative w-[320px] h-[640px] mx-auto">
+            {/* Phone Mockup */}
             <img
-                src="https://web-mobile-first.s3.eu-west-3.amazonaws.com/production/mockup_apple_iphone_13_2021_793ab5435d.png"
+                src="https://mockuphone.com/images/devices_picture/apple-iphone13-blue-portrait.png"
                 alt="phone"
-                className="w-full h-full object-contain"
-            /> */}
+                className="w-full h-full object-contain z-50"
+            />
 
             {/* WhatsApp Screen Area */}
-            <div className="absolute top-[60px] left-[25px] w-[270px] h-[520px] rounded-[1.5rem] overflow-hidden bg-[url('https://i.pinimg.com/564x/d2/a7/76/d2a77609f5d97b9081b117c8f699bd37.jpg')] bg-cover bg-center flex flex-col">
+            <div className="absolute top-[10%] left-[11.5%] w-[76%] h-[80%] rounded-[1.5rem] overflow-hidden z-0
+                    bg-[url('https://i.pinimg.com/564x/d2/a7/76/d2a77609f5d97b9081b117c8f699bd37.jpg')] 
+                    bg-cover bg-center flex flex-col shadow-inner">
                 {/* WhatsApp Header */}
                 <div className="bg-green-600 text-white p-2 flex items-center gap-2">
                     <img
@@ -189,12 +191,13 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                 </div>
 
                 {/* Chat Area */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                <div className="flex-1 overflow-y-auto p-3 space-y-2 ">
                     {children}
                 </div>
             </div>
         </div>
     );
+
 
     const renderTemplatePreview = (templateId) => {
         if (!templateId) return null;
@@ -211,49 +214,51 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
 
         return (
             <PhonePreview>
-                {components.map((component, i) => {
-                    if (component.type === "HEADER" && component.text) {
-                        return (
-                            <div key={i} className="max-w-[75%] bg-gray-200 p-2 rounded-xl self-start">
-                                {component.text}
-                            </div>
-                        );
-                    }
-
-                    if (component.type === "BODY" && component.text) {
-                        return (
-                            <div key={i} className="max-w-[75%] bg-green-100 p-2 rounded-xl self-end">
-                                {component.text}
-                            </div>
-                        );
-                    }
-
-                    if (component.type === "FOOTER" && component.text) {
-                        return (
-                            <div key={i} className="max-w-[60%] bg-gray-100 p-2 rounded-lg text-xs self-start">
-                                {component.text}
-                            </div>
-                        );
-                    }
-
-                    if (component.type === "BUTTONS" && component.buttons?.length > 0) {
-                        return (
-                            <div key={i} className="flex flex-col gap-2 self-end mt-2">
-                                {component.buttons.map((btn, index) => (
-                                    <button
-                                        key={index}
-                                        disabled
-                                        className="bg-green-600 text-white px-3 py-1 rounded-full text-sm"
+                {components.length > 0 && (
+                    <div
+                        className={`max-w-[75%] p-3 rounded-xl flex flex-col gap-1 ${
+                            // Decide bubble alignment by first component type (or default)
+                            components[0].type === "BODY" ? "self-end bg-green-100" : "self-start bg-gray-200"
+                            }`}
+                    >
+                        {components.map((component, i) => {
+                            if ((component.type === "HEADER" || component.type === "BODY" || component.type === "FOOTER") && component.text) {
+                                return (
+                                    <p
+                                        key={i}
+                                        className={`text-sm ${component.type === "FOOTER" ? "text-gray-500 text-xs" : "text-gray-900"}`}
                                     >
-                                        {btn.text}
-                                    </button>
-                                ))}
-                            </div>
-                        );
-                    }
+                                        {component.text}
+                                    </p>
+                                );
+                            }
 
-                    return null;
-                })}
+                            if (component.type === "BUTTONS" && component.buttons?.length > 0) {
+                                return (
+                                    <div key={i} className="flex flex-col gap-2 mt-2">
+                                        {component.buttons.map((btn, index) => (
+                                            <button
+                                                key={index}
+                                                disabled
+                                                className={`px-3 py-1 rounded-full text-sm ${btn.type === "PHONE_NUMBER"
+                                                        ? "bg-green-600 text-white"
+                                                        : btn.type === "URL"
+                                                            ? "bg-blue-600 text-white"
+                                                            : "bg-gray-400 text-white"
+                                                    }`}
+                                            >
+                                                {btn.text}
+                                            </button>
+                                        ))}
+                                    </div>
+                                );
+                            }
+
+                            return null;
+                        })}
+                    </div>
+                )}
+
             </PhonePreview>
         );
     };
