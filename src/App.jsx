@@ -1,7 +1,6 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import UnprotectedRoute from "./components/UnprotectedRoute";
-import Home from "./pages/Home";
 import Integrations from "./pages/Integrations";
 import Calendly from "./pages/Integrations/Calendly";
 import Shopify from "./pages/Integrations/shopify";
@@ -22,7 +21,7 @@ function App() {
 
       <Route
         path="/"
-        element={<ProtectedRoute><Home /></ProtectedRoute>
+        element={<ProtectedRoute><Navigate to="/integrations" replace /></ProtectedRoute>
         }
       />
 
