@@ -7,7 +7,6 @@ import Shopify from "./pages/Integrations/shopify";
 import WhatsAppLinkGenerator from "./pages/Integrations/WhatsAppLinkGenerator";
 import WooCommerce from "./pages/Integrations/WooCommerce";
 import Login from "./pages/Login";
-import PayuIntegration from "./pages/payUintegrations";
 import WatiAutomations from "./pages/WatiAutomation";
 import WidgetPlugin from "./pages/WidgetPlugin";
 
@@ -22,17 +21,6 @@ function App() {
       <Route
         path="/"
         element={<ProtectedRoute><Navigate to="/integrations" replace /></ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/widget-plugin"
-        element={<ProtectedRoute><WidgetPlugin /></ProtectedRoute>
-        }
-      />
-      <Route
-        path="/payu"
-        element={<ProtectedRoute><PayuIntegration /></ProtectedRoute>
         }
       />
       <Route
