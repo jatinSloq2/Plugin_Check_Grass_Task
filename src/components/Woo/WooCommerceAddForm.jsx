@@ -1,8 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Store, Globe, Key, Lock, Plus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Globe, Key, Loader2, Lock, Plus, Store } from 'lucide-react';
+import { useState } from 'react';
 import { useAuth } from "../../context/AuthContext";
 
-// Updated WooShopIntegration component with real API and callback
+const InputField = ({ label, icon: Icon, type = "text", name, value, onChange, placeholder, required }) => (
+    <div className="space-y-1">
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+            {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Icon className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+                id={name}
+                type={type}
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                required={required}
+                className="w-full pl-10 pr-4 py-3 bg-white border rounded-lg 
+                   border-gray-200 focus:ring-2 focus:ring-blue-500 
+                   focus:border-blue-500 transition-colors duration-200 
+                   placeholder-gray-400"
+            />
+        </div>
+    </div>
+);
+
 const WooShopIntegration = ({ onShopAdded }) => {
     const { user } = useAuth();
     const [formData, setFormData] = useState({
@@ -30,28 +55,15 @@ const WooShopIntegration = ({ onShopAdded }) => {
         try {
             const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/woo/shop/add`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: user.id,
-                    ...formData
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, ...formData })
             });
 
             const data = await response.json();
-
-            // Check if the response status is 201 (Created)
             if (response.status === 201) {
                 setSuccess(true);
                 setFormData({ shopName: '', shopUrl: '', consumerKey: '', consumerSecret: '' });
-
-                // Show success message for 2 seconds then notify parent
-                setTimeout(() => {
-                    if (onShopAdded) {
-                        onShopAdded(data);
-                    }
-                }, 2000);
+                setTimeout(() => onShopAdded?.(data), 2000);
             } else {
                 throw new Error(data.message || 'Failed to add shop');
             }
@@ -64,146 +76,90 @@ const WooShopIntegration = ({ onShopAdded }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 shadow-lg">
-                        <Store className="w-8 h-8 text-white" />
-                    </div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Connect Your Store</h1>
-                    <p className="text-gray-600">Add your WooCommerce shop to get started</p>
+                    <img
+                        src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/logos/woo-0pimxgd1jnfnv4a5ygnvxj.png/woo-nb1n5l8athnrm1fpythf.png?_a=DATAg1XyZAA0"
+                        alt="Woo Commerce Logo"
+                        className="w-20 h-20 mx-auto object-contain mb-4"
+                    />
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Woo Commerce</h1>
+                    <p className="text-gray-600 text-lg">Enter your Woo-Commerce store details to connect</p>
                 </div>
 
-                {/* Success Message */}
-                {success && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-300">
-                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        <p className="text-green-800 font-medium">Shop added successfully!</p>
-                    </div>
-                )}
-
-                {/* Error Message */}
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-300">
-                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                        <p className="text-red-800">{error}</p>
-                    </div>
-                )}
-
                 {/* Form */}
-                <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
-                    <div className="space-y-6">
-                        {/* Shop Name Field */}
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Shop Name
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Store className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <input
-                                    type="text"
-                                    name="shopName"
-                                    value={formData.shopName}
-                                    onChange={handleChange}
-                                    placeholder="My Awesome Store"
-                                    required
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 placeholder-gray-400"
-                                />
-                            </div>
-                        </div>
+                <form onSubmit={handleSubmit} className="bg-gray-50 rounded p-8 space-y-6">
+                    <InputField
+                        label="Shop Name"
+                        icon={Store}
+                        name="shopName"
+                        value={formData.shopName}
+                        onChange={handleChange}
+                        placeholder="Enter your shop name"
+                        required
+                    />
+                    <InputField
+                        label="Store URL"
+                        icon={Globe}
+                        type="url"
+                        name="shopUrl"
+                        value={formData.shopUrl}
+                        onChange={handleChange}
+                        placeholder="Enter your store URL"
+                        required
+                    />
+                    <InputField
+                        label="Consumer Key"
+                        icon={Key}
+                        name="consumerKey"
+                        value={formData.consumerKey}
+                        onChange={handleChange}
+                        placeholder="ck_xxxxxxxxxxxxxxxx"
+                        required
+                    />
+                    <InputField
+                        label="Consumer Secret"
+                        icon={Lock}
+                        type="password"
+                        name="consumerSecret"
+                        value={formData.consumerSecret}
+                        onChange={handleChange}
+                        placeholder="cs_xxxxxxxxxxxxxxxx"
+                        required
+                    />
 
-                        {/* Shop URL Field */}
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Shop URL
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Globe className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <input
-                                    type="url"
-                                    name="shopUrl"
-                                    value={formData.shopUrl}
-                                    onChange={handleChange}
-                                    placeholder="https://yourstore.com"
-                                    required
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 placeholder-gray-400"
-                                />
-                            </div>
-                        </div>
+                    {/* Error / Success */}
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+                    {success && <p className="text-sm text-green-600">Shop added successfully!</p>}
 
-                        {/* Consumer Key Field */}
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Consumer Key
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Key className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <input
-                                    type="text"
-                                    name="consumerKey"
-                                    value={formData.consumerKey}
-                                    onChange={handleChange}
-                                    placeholder="ck_xxxxxxxxxxxxxxxx"
-                                    required
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 placeholder-gray-400"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Consumer Secret Field */}
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Consumer Secret
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <input
-                                    type="password"
-                                    name="consumerSecret"
-                                    value={formData.consumerSecret}
-                                    onChange={handleChange}
-                                    placeholder="cs_xxxxxxxxxxxxxxxx"
-                                    required
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 placeholder-gray-400"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
+                    {/* Submit */}
                     <button
-                        onClick={handleSubmit}
+                        type="submit"
                         disabled={loading}
-                        className="w-full mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                        className="w-full mt-4 bg-green-600 text-white py-3 px-4 rounded font-medium 
+                       hover:bg-green-700 focus:ring-4 focus:ring-green-200 
+                       transition-all duration-200 disabled:opacity-50 
+                       flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
                         {loading ? (
                             <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Adding Shop...
+                                <Loader2 className="w-5 h-5 animate-spin" /> Adding Shop...
                             </>
                         ) : (
                             <>
-                                <Plus className="w-5 h-5" />
-                                Add Shop
+                                <Plus className="w-5 h-5" /> Add Shop
                             </>
                         )}
                     </button>
-                </div>
+                </form>
 
-                {/* Help Text */}
+                {/* Help */}
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-500">
                         Need help finding your API credentials?{' '}
-                        <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+                        <a href="#" className="text-green-600 hover:text-green-700 font-medium">
                             View our guide
                         </a>
                     </p>

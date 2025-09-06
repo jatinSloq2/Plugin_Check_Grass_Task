@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import PhonePreview from '../PhonePreview';
+import TemplatePreview from '../TemplatePreview';
 
 export default function AutomatedMsgSettings({ settings = {}, onChange }) {
     const [localSettings, setLocalSettings] = useState(settings);
@@ -163,106 +165,6 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         onChange(updated);
     };
 
-
-    const PhonePreview = ({ children }) => (
-        <div className="relative w-[320px] h-[640px] mx-auto">
-            {/* Phone Mockup */}
-            <img
-                src="https://mockuphone.com/images/devices_picture/apple-iphone13-blue-portrait.png"
-                alt="phone"
-                className="w-full h-full object-contain z-50"
-            />
-
-            {/* WhatsApp Screen Area */}
-            <div className="absolute top-[10%] left-[11.5%] w-[76%] h-[80%] rounded-[1.5rem] overflow-hidden z-0
-                    bg-[url('https://i.pinimg.com/564x/d2/a7/76/d2a77609f5d97b9081b117c8f699bd37.jpg')] 
-                    bg-cover bg-center flex flex-col shadow-inner">
-                {/* WhatsApp Header */}
-                <div className="bg-green-600 text-white p-2 flex items-center gap-2">
-                    <img
-                        src="https://i.pravatar.cc/40"
-                        alt="contact"
-                        className="w-8 h-8 rounded-full"
-                    />
-                    <div>
-                        <p className="font-semibold text-sm">John Doe</p>
-                        <p className="text-xs text-green-100">online</p>
-                    </div>
-                </div>
-
-                {/* Chat Area */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-2 ">
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
-
-
-    const renderTemplatePreview = (templateId) => {
-        if (!templateId) return null;
-        const detail = templateDetails[templateId];
-
-        if (loadingId === templateId) {
-            return <div className="text-gray-500 text-sm">Loading preview...</div>;
-        }
-        if (!detail) {
-            return <div className="text-gray-500 text-sm">No preview available</div>;
-        }
-
-        const { components = [] } = detail;
-
-        return (
-            <PhonePreview>
-                {components.length > 0 && (
-                    <div
-                        className={`max-w-[75%] p-3 rounded-xl flex flex-col gap-1 ${
-                            // Decide bubble alignment by first component type (or default)
-                            components[0].type === "BODY" ? "self-end bg-green-100" : "self-start bg-gray-200"
-                            }`}
-                    >
-                        {components.map((component, i) => {
-                            if ((component.type === "HEADER" || component.type === "BODY" || component.type === "FOOTER") && component.text) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className={`text-sm ${component.type === "FOOTER" ? "text-gray-500 text-xs" : "text-gray-900"}`}
-                                    >
-                                        {component.text}
-                                    </p>
-                                );
-                            }
-
-                            if (component.type === "BUTTONS" && component.buttons?.length > 0) {
-                                return (
-                                    <div key={i} className="flex flex-col gap-2 mt-2">
-                                        {component.buttons.map((btn, index) => (
-                                            <button
-                                                key={index}
-                                                disabled
-                                                className={`px-3 py-1 rounded-full text-sm ${btn.type === "PHONE_NUMBER"
-                                                    ? "bg-green-600 text-white"
-                                                    : btn.type === "URL"
-                                                        ? "bg-blue-600 text-white"
-                                                        : "bg-gray-400 text-white"
-                                                    }`}
-                                            >
-                                                {btn.text}
-                                            </button>
-                                        ))}
-                                    </div>
-                                );
-                            }
-
-                            return null;
-                        })}
-                    </div>
-                )}
-
-            </PhonePreview>
-        );
-    };
-
     const renderMsgType = (type, label, description = "Hi this is the description of this") => {
         const msgSetting = localSettings[type];
 
@@ -322,7 +224,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
 
                             {/* Reminder Selection */}
                             {msgSetting.enabled && (
-                                <div className="w-full">
+                                <div className="w-fit">
                                     <label className="block text-sm font-medium mb-1 text-gray-700">
                                         Select Reminder
                                     </label>
@@ -404,7 +306,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                     </div>
 
                                     {/* Template Selector */}
-                                    <div className="w-full">
+                                    <div className="w-fit">
                                         <label className="block text-sm font-medium mb-1 text-gray-700">
                                             Select Template
                                         </label>
@@ -441,7 +343,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
 
                                     {/* Preview */}
                                     <div className="w-full flex justify-center">
-                                        {renderTemplatePreview(currentMsg.templateId)}
+                                        <TemplatePreview templateId={fallback.templateId} />
                                     </div>
                                 </>
                             )}
@@ -451,7 +353,6 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
             );
         }
 
-        // Fallback for others
         const fallback = msgSetting || { enabled: false, templateId: "" };
 
         return (
@@ -515,7 +416,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                         {/* Phone Preview */}
                         {fallback.enabled && (
                             <div className="w-full flex justify-center">
-                                {renderTemplatePreview(fallback.templateId)}
+                                <TemplatePreview templateId={fallback.templateId} />
                             </div>
                         )}
                     </div>
