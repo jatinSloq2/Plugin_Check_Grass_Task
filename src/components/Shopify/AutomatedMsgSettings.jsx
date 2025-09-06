@@ -241,10 +241,10 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
                                                 key={index}
                                                 disabled
                                                 className={`px-3 py-1 rounded-full text-sm ${btn.type === "PHONE_NUMBER"
-                                                        ? "bg-green-600 text-white"
-                                                        : btn.type === "URL"
-                                                            ? "bg-blue-600 text-white"
-                                                            : "bg-gray-400 text-white"
+                                                    ? "bg-green-600 text-white"
+                                                    : btn.type === "URL"
+                                                        ? "bg-blue-600 text-white"
+                                                        : "bg-gray-400 text-white"
                                                     }`}
                                             >
                                                 {btn.text}
@@ -267,10 +267,10 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
         const msgSetting = localSettings[type];
 
         const cardClasses =
-            "border border-gray-200 rounded p-6 mb-6 bg-white shadow-sm";
+            "border border-gray-200 rounded p-12 bg-white";
 
         const sectionTitle =
-            "font-semibold text-lg mb-2 text-gray-900 flex items-center gap-2";
+            "text-black flex items-center gap-2 text-2xl font-semibold text-black mb-2";
 
         const radioWrapper =
             "flex items-center space-x-2 bg-white text-blue-100 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-green-500 transition";
@@ -279,7 +279,7 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
             "border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500";
 
         const descriptionText =
-            "text-md text-gray-600 leading-relaxed mb-4 max-w-lg";
+            "text-muted-foreground max-w-xl";
 
         if (type === "cartAbandoned" && msgSetting?.messages?.length > 0) {
             const [selectedReminder, setSelectedReminder] = useState(0); // default Reminder 1
@@ -526,32 +526,33 @@ export default function AutomatedMsgSettings({ settings = {}, onChange }) {
     };
 
     return (
-        <div className="p-6">
+        <div className="">
             {renderMsgType(
                 'orderCreated',
                 'Order Created',
-                'This automated WhatsApp message is sent to the customer immediately after placing an order. Templates are pre-approved by WhatsApp and cannot be modified.'
+                'This automated WhatsApp notification is triggered immediately after a customer successfully places an order on your store. It provides instant confirmation and reassurance to the buyer that their order has been received. Since these templates are pre-approved by WhatsApp, their content and structure cannot be customized or modified.'
             )}
             {renderMsgType(
                 'orderCanceled',
                 'Order Canceled',
-                'Sent when an order is canceled by the customer or merchant. Templates cannot be edited once approved by WhatsApp.'
+                'This message is automatically sent when an order is canceled, either by the customer or by the merchant. It helps keep customers informed about the status of their order and ensures clear communication. WhatsApp requires that all templates be pre-approved, so the wording of this notification cannot be changed once approved.'
             )}
             {renderMsgType(
                 'orderFulfilled',
                 'Order Fulfilled',
-                'Sent after the order has been fulfilled. Lets customers know their items are on the way.'
+                'Once the order has been processed and shipped, this message is sent to notify the customer that their items are on the way. It improves transparency in the buying journey and helps build trust with your customers. As with other templates, the content is pre-approved by WhatsApp and cannot be modified.'
             )}
             {renderMsgType(
                 'afterOrderFulfilled',
                 'After Order Fulfilled',
-                'Follow-up message sent after order delivery to increase customer engagement. Templates require WhatsApp approval.'
+                'This follow-up message is sent after the order has been successfully delivered. It is designed to re-engage customers, encourage repeat purchases, and open opportunities for feedback or reviews. Since WhatsApp requires template approval, this message must follow pre-approved formats and cannot be freely edited.'
             )}
             {renderMsgType(
                 'cartAbandoned',
                 'Abandoned Recovery Message',
-                'Recover abandoned carts by reaching your customers on WhatsApp. Message is sent 5 minutes after customer abandons cart. Automated WhatsApp message templates cannot be modified or edited, because templates need to be pre-approved by WhatsApp before they can be sent using the API.'
+                'If a customer leaves items in their cart without completing the purchase, this automated reminder is sent about 5 minutes after the cart is abandoned. It helps recover lost sales by prompting customers to return and finish their checkout. As with all WhatsApp automated templates, the content cannot be modified because WhatsApp requires prior approval before use.'
             )}
         </div>
+
     );
 }
