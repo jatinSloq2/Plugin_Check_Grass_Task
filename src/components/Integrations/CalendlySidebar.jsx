@@ -222,7 +222,7 @@ const CalendlySidebar = ({ onClose }) => {
                                 {/* Reminder + Event Settings (vertical stacked layout) */}
                                 <div className="flex flex-col gap-6 bg-white rounded shadow">
                                     {/* Reminder Settings */}
-                                    <div className="overflow-hidden">
+                                    <div className="overflow-hidden py-4 px-2">
                                         <div className="flex items-center px-4 py-3">
                                             <Bell className="h-5 w-5 text-green-600 mr-2" />
                                             <h2 className="text-lg font-semibold text-gray-900">Reminder Settings</h2>
@@ -319,7 +319,7 @@ const CalendlySidebar = ({ onClose }) => {
                                     <hr className="border-t border-gray-200" />
 
                                     {/* Event Notifications */}
-                                    <div className="overflow-hidden ">
+                                    <div className="overflow-hidden py-4 px-2">
                                         <div className="flex items-center px-4 py-3">
                                             <Settings className="h-5 w-5 text-green-600 mr-2" />
                                             <h2 className="text-lg font-semibold text-gray-900">
@@ -416,7 +416,7 @@ const CalendlySidebar = ({ onClose }) => {
                                 <div className="flex mt-6">
                                     <button
                                         onClick={handleSaveSettings}
-                                        className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg shadow"
+                                        className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded shadow"
                                     >
                                         Save Settings
                                     </button>
