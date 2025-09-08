@@ -2,6 +2,7 @@ export const integrations = [
     {
         id: 1,
         name: 'Shopify',
+        type: 'internal',
         logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/1280px-Shopify_logo_2018.svg.png',
         description: 'Chat Widget, Cart Abandonment Emails, etc.',
         bgColor: 'bg-gradient-to-br from-green-50 to-green-100',
@@ -13,6 +14,7 @@ export const integrations = [
     {
         id: 2,
         name: 'WhatsApp',
+        type: 'internal',
         logo: 'https://freepnglogo.com/images/all_img/1716574910whatsapp-logo-png-with-name.png',
         description: 'Add WhatsApp Chat Widget to your website',
         bgColor: 'bg-gradient-to-br from-green-50 to-emerald-100',
@@ -22,8 +24,9 @@ export const integrations = [
         featured: ['new', 'business']
     },
     {
-        id: 4,
+        id: 3,
         name: 'WhatsApp Link Generator',
+        type: 'internal',
         logo: 'https://freepnglogo.com/images/all_img/1716574910whatsapp-logo-png-with-name.png',
         description: 'Add WhatsApp Link Generator for your business',
         bgColor: 'bg-gradient-to-br from-green-50 to-emerald-100',
@@ -32,20 +35,22 @@ export const integrations = [
         link: '/integrations/linkgenerator',
         featured: ['new', 'business']
     },
-    // {
-    //     id: 3,
-    //     name: 'Facebook',
-    //     logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnrQ65msCT7hPvWDPXDmGTTYHhh9ybBDXf6UzUpdkUBTcqwZ-vvpfD08fB3K6m0izveg&usqp=CAU',
-    //     description: 'Connect your Facebook account to receive Ad insights and events from Facebook',
-    //     bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    //     borderColor: 'border-blue-200',
-    //     hoverBg: 'hover:from-blue-100 hover:to-blue-200',
-    //     link: '/integrations/facebook',
-    //     featured: ['new', 'business']
-    // },
     {
         id: 4,
+        name: 'Facebook',
+        type: 'internal',
+        logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnrQ65msCT7hPvWDPXDmGTTYHhh9ybBDXf6UzUpdkUBTcqwZ-vvpfD08fB3K6m0izveg&usqp=CAU',
+        description: 'Connect your Facebook account to receive Ad insights and events from Facebook',
+        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100',
+        borderColor: 'border-blue-200',
+        hoverBg: 'hover:from-blue-100 hover:to-blue-200',
+        link: '/integrations/facebook',
+        featured: ['new', 'business']
+    },
+    {
+        id: 5,
         name: 'Google Sheets',
+        type: 'external',
         logo: 'https://cdn.worldvectorlogo.com/logos/google-sheets-full-logo-1.svg',
         description: 'Send Broadcast messages directly from Google Sheets',
         bgColor: 'bg-gradient-to-br from-green-50 to-teal-100',
@@ -55,8 +60,9 @@ export const integrations = [
         featured: ['new', 'business']
     },
     {
-        id: 5,
+        id: 6,
         name: 'WooCommerce',
+        type: 'internal',
         logo: 'https://www.sendago.com/assets/images/logo_woocommerce.png',
         description: 'Chat Widget, Cart Abandonment, Emails for WooCommerce',
         bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100',
@@ -66,8 +72,9 @@ export const integrations = [
         featured: ['new', 'business']
     },
     {
-        id: 6,
+        id: 7,
         name: 'WhatsApp Shop',
+        type: 'external',
         logo: 'https://freepnglogo.com/images/all_img/1716574910whatsapp-logo-png-with-name.png',
         description: 'Get Orders And Share Your Very Own Created Store',
         bgColor: 'bg-gradient-to-br from-emerald-50 to-green-100',
@@ -77,8 +84,9 @@ export const integrations = [
         featured: ['new', 'business']
     },
     {
-        id: 7,
-        name: 'Zapier',
+        id: 8,
+        name: 'Calendly',
+        type: 'modal', // only this one is modal
         logo: 'https://img.proremodeler.com/files/base/ebm/proremodeler/image/2024/10/670c3bbe6510950fc6d122c8-calendly_logo_horizontal_color.png?auto=format,compress&fit=fill&fill=blur&q=45&w=640&width=640',
         description: 'Send an approved template WhatsApp message',
         bgColor: 'bg-gradient-to-br from-orange-50 to-yellow-100',

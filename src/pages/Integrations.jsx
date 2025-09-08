@@ -1,20 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { integrations } from '../Constants';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import CalendlySidebar from '../components/Integrations/CalendlySidebar';
 
 const Integrations = () => {
     const navigate = useNavigate();
     const [integrationName, setIntegrationName] = useState('');
+    const [activeIntegration, setActiveIntegration] = useState(null);
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
 
-    const handleIntegrationClick = (link) => {
-        console.log(`Navigating to: ${link}`);
+    const handleIntegrationClick = (integration) => {
+        console.log(`Clicked: ${integration.name}`);
 
-        if (link.startsWith("http")) {
-            window.open(link, "_blank");
-        } else {
-            navigate(link);
+        if (integration.type === "external") {
+            window.open(integration.link, "_blank");
+        } else if (integration.type === "internal") {
+            navigate(integration.link);
+        } else if (integration.type === "modal") {
+            setActiveIntegration(integration.name);
         }
     };
 
@@ -28,6 +32,16 @@ const Integrations = () => {
         console.log(`Request submitted: ${integrationName}, Email: ${email}`);
         // You can replace with API call
     };
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const service = params.get("service");
+
+        if (service === "Calendly") {
+            setActiveIntegration("Calendly");
+        }
+    }, [location.search]);
 
     return (
         <div className="min-h-screen bg-[#F9FAFB]">
@@ -41,13 +55,13 @@ const Integrations = () => {
                     automation.
                 </p>
             </div>
-            <div className="mx-auto p-8 ">
+            <div className="mx-auto p-8">
                 {/* Integrations Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                     {integrations.map((integration) => (
                         <div
                             key={integration.id}
-                            onClick={() => handleIntegrationClick(integration.link)}
+                            onClick={() => handleIntegrationClick(integration)}
                             className="h-70 rounded p-8 bg-white border border-gray-200 hover:shadow-lg hover:shadow-green-100/50 
                          transition-all duration-300 cursor-pointer hover:scale-105 group relative overflow-hidden"
                         >
@@ -152,6 +166,9 @@ const Integrations = () => {
 
                 </div>
             </div >
+            {activeIntegration === "Calendly" && (
+                <CalendlySidebar onClose={() => setActiveIntegration(null)} />
+            )}
         </div >
     );
 };
